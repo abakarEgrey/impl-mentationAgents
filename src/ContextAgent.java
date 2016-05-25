@@ -144,22 +144,15 @@ private Boolean isValid (List<ServicesStateVR> actualState){
 	return true;
 }
 
-private Boolean isNeighboursStateValid (List<ServicesStateVR> actualState){
+private Boolean isNeighboursStateValid (List<List<ServicesStateVR>> actualState){
 	//TODO may require some changes if we use multiple connections for one service
-	ServicesStateVR serviceI;
 	if(actualState.size() == neightboursState.size())
 	{
 		//The size is good: normal behavior
 		Boolean isV = true;
 		for (int i=0; i<actualState.size(); i++)
 		{
-//			public class ServicesStateVR {
-//				public List<String> cSInstanceType;
-//				public Boolean sameInstance; 
-//			}
-			//State service i
-			servicesI = actualState.get(i);
-			if(serviceI)
+			if( hasSimpleCorrelation(actualState.get(i), neightboursState.get(i)))
 			{
 				//TODO
 				//Context agent is not valid for this criteria
@@ -175,8 +168,10 @@ private Boolean isNeighboursStateValid (List<ServicesStateVR> actualState){
 	}
 }
 
-private Boolean hasCorrelation(){
+private Boolean hasSimpleCorrelation(List<ServicesStateVR> list1, List<ServicesStateVR> liste2){
 	
+	//TODO
+	return true;
 }
 
 	
