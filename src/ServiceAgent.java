@@ -1,14 +1,16 @@
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 public class ServiceAgent extends Agent{
 //Properties
-	private Boolean isConnected;
+	private Pair<Boolean, List<Agent>> isConnected;
 	private Agent connectedAgent;
 	//TODO messages from other services agents and from 
 	private List<ContextAgent> ContextAgents;
 	private InstanceAgent instanceAgent;
-	
+	private HashMap<String, Pair<Integer, Double>> nbConnectEtTempMoy;
+	//private  HashMap<Agent, Pair<Boolean, List<Agent>>> etatsVoisins; 
 //Constructor ServiceAgent
 	public ServiceAgent (){
 		
@@ -16,7 +18,7 @@ public class ServiceAgent extends Agent{
 	
 //Acessors
 	//TODO maybe to change
-	public List<String> getNeighboursState ()
+	public List<<Agent>, Pair<Boolean, List<Agent>>> getNeighboursState ()
 	{
 		return instanceAgent.getChildrenState();
 	}
