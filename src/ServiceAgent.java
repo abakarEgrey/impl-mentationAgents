@@ -8,7 +8,12 @@ import java.util.Set;
 
 public class ServiceAgent extends Agent{
 //Properties
+
 	private Pair<Boolean, List<Agent>> isConnected;
+
+	private Pair<Boolean, List<ServiceAgent>> isConnected;
+	private Agent connectedAgent;
+
 	//TODO messages from other services agents and from 
 	private List<ContextAgent> contextAgents;
 	private InstanceAgent instanceAgent;
@@ -28,7 +33,7 @@ public class ServiceAgent extends Agent{
 	
 //Acessors
 	//TODO maybe to change
-	public List<Pair<Boolean, List<Agent>>> getNeighboursState()
+	public List<Pair<Boolean, List<ServiceAgent>>> getNeighboursState()
 	{
 		return instanceAgent.getChildrenState();
 	}
@@ -61,4 +66,14 @@ public class ServiceAgent extends Agent{
 	public void creerFils() {
 		
 	}
+
+
+	public boolean isConnected() {
+		return isConnected.getFirst();
+	}
+
+	public List<ServiceAgent> getConnectedAgents() {
+		return isConnected.getSecond();
+	}
+
 }
