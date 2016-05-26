@@ -1,19 +1,29 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 
 public class ServiceAgent extends Agent{
 //Properties
 	private Pair<Boolean, List<Agent>> isConnected;
-	private Agent connectedAgent;
 	//TODO messages from other services agents and from 
-	private List<ContextAgent> ContextAgents;
+	private List<ContextAgent> contextAgents;
 	private InstanceAgent instanceAgent;
-	private HashMap<String, Pair<Integer, Double>> nbConnectEtTempMoy;
+	private Map<String, Pair<Integer, Double>> nbConnectEtTempMoy;
+	private Queue<MessageAgent> messages;
+	//action choisie par l'agent service et elle est mis à jour par la methode decider
+	private Action actionChoisie = null;  
 	//private  HashMap<Agent, Pair<Boolean, List<Agent>>> etatsVoisins; 
 //Constructor ServiceAgent
-	public ServiceAgent (){
-		
+	public ServiceAgent (String id, InstanceAgent pere){
+		this.name = id;
+		this.instanceAgent = pere;
+		this.contextAgents = new ArrayList<ContextAgent>();
+		this.nbConnectEtTempMoy = new HashMap<String, Pair<Integer,Double>>();
+		this.messages = new PriorityQueue<MessageAgent>();
 	}
 	
 //Acessors
@@ -47,5 +57,8 @@ public class ServiceAgent extends Agent{
 		// TODO Auto-generated method stub
 		
 	}
-
+	
+	public void creerFils() {
+		
+	}
 }
