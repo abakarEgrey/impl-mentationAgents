@@ -18,7 +18,7 @@ public class ServiceAgent extends Agent{
 	
 //Acessors
 	//TODO maybe to change
-	public List<Pair<Boolean, List<Agent>>> getNeighboursState()
+	public List<Pair<Boolean, List<ServiceAgent>>> getNeighboursState()
 	{
 		return instanceAgent.getChildrenState();
 	}

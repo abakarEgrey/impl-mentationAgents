@@ -17,7 +17,8 @@ public class ContextAgent extends Agent {
 	// Ranges of Validity
 	private String senderType; // List<String>?
 	private Action messageType;
-	private List<List<ServicesStateVR>> neightboursState;
+	//private List<List<ServicesStateVR>> neightboursState;
+	private List<ServicesStateVR> neightboursState;
 	private boolean serviceAgentState;
 	private String typeConnectedAgent;
 	// private int nbOfConnection
@@ -25,7 +26,16 @@ public class ContextAgent extends Agent {
 	// private Cardinality
 
 	// Constructor
-	public ContextAgent(String senderType, Action messageType, List<List<ServicesStateVR>> neightboursState,
+//	public ContextAgent(String senderType, Action messageType, List<List<ServicesStateVR>> neightboursState,
+//			boolean serviceAgentState, String typeConnectedAgent) {
+//		this.senderType = senderType;
+//		this.messageType = messageType;
+//		this.neightboursState = neightboursState;
+//		this.serviceAgentState = serviceAgentState;
+//		this.typeConnectedAgent = typeConnectedAgent;
+//	}
+	
+	public ContextAgent(String senderType, Action messageType, List<ServicesStateVR> neightboursState,
 			boolean serviceAgentState, String typeConnectedAgent) {
 		this.senderType = senderType;
 		this.messageType = messageType;
@@ -99,9 +109,10 @@ public class ContextAgent extends Agent {
 	protected void perceive() {
 		isValid = false;
 
-		List<List<ServicesStateVR>> _actualState = serviceAgent.getNeighboursState();
+		//List<List<ServicesStateVR>> _actualState = serviceAgent.getNeighboursState();
+		List<Pair<Boolean,List<ServiceAgent>>> _actualState = serviceAgent.getNeighboursState();
 		boolean _serviceAgentState = serviceAgent.isConnected();
-		String _typeConnectedAgent = serviceAgent.getConnectedAgent(); // TODO
+		List<ServiceAgent> _typeConnectedAgent = serviceAgent.getConnectedAgents(); // TODO
 																		// change
 																		// for
 																		// multiple
@@ -137,7 +148,7 @@ public class ContextAgent extends Agent {
 	private List<List<ServicesStateVR>> getNeighboursState() {
 		List<List<ServicesStateVR>> actualState = serviceAgent.getNeighboursState();
 		if (actualState.size() == neightboursState.size()) {
-			// The size is good: normal behavior
+			// The size is good: normal behavior 
 		} else {
 			// TODO send an error
 		}

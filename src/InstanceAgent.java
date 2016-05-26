@@ -47,7 +47,7 @@ public class InstanceAgent extends Agent{
 	}
 
 	
-	public List<Pair<Boolean, List<Agent>>> getChildrenState() {
+	public List<Pair<Boolean, List<ServiceAgent>>> getChildrenState() {
 		// TODO Auto-generated method stub	
 		return null;
 	}
