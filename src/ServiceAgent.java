@@ -52,9 +52,8 @@ public class ServiceAgent extends Agent{
 		return isConnected.getFirst();
 	}
 
-	public String getConnectedAgent() {
-		List<ServiceAgent> listCo = isConnected.getSecond();
-		return listCo.get(0).;
+	public List<ServiceAgent> getConnectedAgents() {
+		return isConnected.getSecond();
 	}
 
 }

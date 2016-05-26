@@ -4,24 +4,12 @@ import fr.irit.smac.libs.tooling.scheduling.IAgentStrategy;
 
 abstract public class Agent implements IAgentStrategy {
 // Properties
-	
-	protected Set<Agent> children;
-	protected Agent parent;
 	protected String name; //TODO peut être un id
 	
 //Accessors	
 	protected String getName ()
 	{
 		return name;
-	}
-	
-	protected Agent getParent () 
-	{
-		return parent;
-	}
-	protected  Set<Agent> getSons()
-	{
-		return children;
 	}
 	
 //Life Cycle
