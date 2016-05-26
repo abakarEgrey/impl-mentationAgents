@@ -4,7 +4,7 @@ import java.util.Set;
 
 public class ServiceAgent extends Agent{
 //Properties
-	private Pair<Boolean, List<Agent>> isConnected;
+	private Pair<Boolean, List<ServiceAgent>> isConnected;
 	private Agent connectedAgent;
 	//TODO messages from other services agents and from 
 	private List<ContextAgent> ContextAgents;
@@ -46,6 +46,15 @@ public class ServiceAgent extends Agent{
 	public void delete() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public boolean isConnected() {
+		return isConnected.getFirst();
+	}
+
+	public String getConnectedAgent() {
+		List<ServiceAgent> listCo = isConnected.getSecond();
+		return listCo.get(0).;
 	}
 
 }

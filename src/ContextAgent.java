@@ -8,36 +8,34 @@ public class ContextAgent extends Agent {
 	// Properties
 	private double confidence;
 	private ServiceAgent serviceAgent;
+	private boolean isValid;
+	private List<String> correspondingMessages; // TODO to change for actual
+												// type
+
 	// TODO id??
 
 	// Ranges of Validity
-	private String expeditorType; // List<String>?
+	private String senderType; // List<String>?
 	private Action messageType;
 	private List<List<ServicesStateVR>> neightboursState;
-	private Boolean serviceAgentState;
+	private boolean serviceAgentState;
 	private String typeConnectedAgent;
 	// private int nbOfConnection
 	// private double averageTOConnexion;
 	// private Cardinality
 
 	// Constructor
-	public ContextAgent(String expeditorType, Action messageType, List<List<ServicesStateVR>> neightboursState,
-			Boolean serviceAgentState, String typeConnectedAgent) {
-		this.expeditorType = expeditorType;
+	public ContextAgent(String senderType, Action messageType, List<List<ServicesStateVR>> neightboursState,
+			boolean serviceAgentState, String typeConnectedAgent) {
+		this.senderType = senderType;
 		this.messageType = messageType;
 		this.neightboursState = neightboursState;
 		this.serviceAgentState = serviceAgentState;
 		this.typeConnectedAgent = typeConnectedAgent;
 	}
 
-	// ***Accessor and
+	//Accessors and mutators
 
-	// @Override
-	// protected Set<Agent> getSons()
-	// {
-	// // TODO use errors
-	// return null;
-	// }
 
 	public double getConfidence() {
 		return confidence;
@@ -55,12 +53,12 @@ public class ContextAgent extends Agent {
 		this.serviceAgent = serviceAgent;
 	}
 
-	public String getExpeditorType() {
-		return expeditorType;
+	public String getSenderType() {
+		return senderType;
 	}
 
-	private void setExpeditorType(String expeditorType) {
-		this.expeditorType = expeditorType;
+	private void setSenderType(String senderType) {
+		this.senderType = senderType;
 	}
 
 	public Action getMessageType() {
@@ -79,11 +77,11 @@ public class ContextAgent extends Agent {
 		this.neightboursState = neightboursState;
 	}
 
-	public Boolean getServiceAgentState() {
+	public boolean getServiceAgentState() {
 		return serviceAgentState;
 	}
 
-	private void setServiceAgentState(Boolean serviceAgentState) {
+	private void setServiceAgentState(boolean serviceAgentState) {
 		this.serviceAgentState = serviceAgentState;
 	}
 
@@ -99,20 +97,34 @@ public class ContextAgent extends Agent {
 
 	@Override
 	protected void perceive() {
-		// TODO Auto-generated method stub
+		isValid = false;
 
+		List<List<ServicesStateVR>> _actualState = serviceAgent.getNeighboursState();
+		boolean _serviceAgentState = serviceAgent.isConnected();
+		String _typeConnectedAgent = serviceAgent.getConnectedAgent(); // TODO
+																		// change
+																		// for
+																		// multiple
+																		// connections
+		if (isBasicCriterionValid(_actualState, _serviceAgentState, _typeConnectedAgent)) {
+			// TODO Read every messages of its service agent until it found the
+			// good message
+			// Try for each is valid
+			// If valid for a message stock it in a list
+		}
 	}
 
 	@Override
 	protected void decide() {
-		// TODO Auto-generated method stub
+		// Depends, or nothing because the agent will send every actions, or it
+		// will decide between all of them an then TODO
 
 	}
 
 	@Override
 	protected void act() {
-		// TODO Auto-generated method stub
-
+		// Depends, or nothing because the agent will send every actions, or it
+		// will decide between all of them an then TODO
 	}
 
 	@Override
@@ -126,28 +138,71 @@ public class ContextAgent extends Agent {
 		List<List<ServicesStateVR>> actualState = serviceAgent.getNeighboursState();
 		if (actualState.size() == neightboursState.size()) {
 			// The size is good: normal behavior
-			return actualState;
 		} else {
 			// TODO send an error
 		}
-
+		return actualState;
 	}
 
-	private Boolean isValid(String _expeditorType, Action _messageType, List<List<ServicesStateVR>> _actualState,
-			Boolean _serviceAgentState, String _typeConnectedAgent) {
+	/**
+	 * 
+	 * @param _senderType
+	 *            : the type of the InstanceAgent of the sender (which is a
+	 *            ServiceAgent)
+	 * @param _messageType
+	 *            : the type of the message (see Action)
+	 * @param _actualState
+	 *            : the state (connected and with who) of the other
+	 *            ServiceAgents of the InstanceAgent
+	 * @param _serviceAgentState
+	 *            : the state (connected) of the serviceAgent
+	 * @param _typeConnectedAgent
+	 *            : the type of the ServiceAgent with which the serviceAgent is
+	 *            connected
+	 * @return : if the context agent is valid i.e. if the context is reproduced
+	 */
+	private boolean isContextAgentValid(String _senderType, Action _messageType,
+			List<List<ServicesStateVR>> _actualState, boolean _serviceAgentState, String _typeConnectedAgent) {
 		// If one criteria is not valid, the context is not valid
-		if (_expeditorType == null || expeditorType == null || !_expeditorType.equals(expeditorType)) {
+		if (_senderType == null || senderType == null || !_senderType.equals(senderType)) {
 			// TODO change if become a list
 			return false;
 		}
-		if (_messageType == null || messageType == null || !_messageType.equals(expeditorType)) {
+		if (_messageType == null || messageType == null || !_messageType.equals(messageType)) {
+			return false;
+		}
+		if (!((serviceAgentState && _serviceAgentState) || ((!serviceAgentState) && (!_serviceAgentState)))) {
+			// TODO may need to be changed if bool can become either
+			return false;
+		}
+		if (_typeConnectedAgent == null || typeConnectedAgent == null
+				|| !typeConnectedAgent.equals(_typeConnectedAgent)) {
+			// TODO change if become a list with correlation?
 			return false;
 		}
 		if (!isNeighboursStateValid(_actualState)) {
 			return false;
 		}
-		if (_serviceAgentState == null || serviceAgentState == null
-				|| !(0 == serviceAgentState.compareTo(_serviceAgentState))) {
+		return true;
+	}
+
+	/**
+	 * @param _actualState
+	 *            : the state (connected and with who) of the other
+	 *            ServiceAgents of the InstanceAgent
+	 * @param _serviceAgentState
+	 *            : the state (connected) of the serviceAgent
+	 * @param _typeConnectedAgent
+	 *            : the type of the ServiceAgent with which the serviceAgent is
+	 *            connected
+	 * @return : if the context agent is valid for criterion about state of
+	 *         ServiceAgents i.e. if the context is reproduced for these
+	 *         criterion
+	 */
+	private boolean isBasicCriterionValid(List<List<ServicesStateVR>> _actualState, boolean _serviceAgentState,
+			String _typeConnectedAgent) {
+		if (!((serviceAgentState && _serviceAgentState) || ((!serviceAgentState) && (!_serviceAgentState)))) {
+			// TODO may need to be changed if bool can become either
 			return false;
 		}
 		if (_typeConnectedAgent == null || typeConnectedAgent == null
@@ -155,18 +210,41 @@ public class ContextAgent extends Agent {
 			// TODO change if become a list
 			return false;
 		}
-
+		if (!isNeighboursStateValid(_actualState)) {
+			return false;
+		}
 		return true;
 	}
 
-	private Boolean isNeighboursStateValid(List<List<ServicesStateVR>> actualState) {
+	/**
+	 * 
+	 * @param _senderType
+	 *            : the type of the InstanceAgent of the sender (which is a
+	 *            ServiceAgent)
+	 * @param _messageType
+	 *            : the type of the message (see Action)
+	 * @return : if the context agent is valid for criterion based on messages
+	 *         i.e. if the context is reproduced for these criterion
+	 */
+	private boolean isMessageCriterionValid(String _senderType, Action _messageType) {
+		if (_senderType == null || senderType == null || !_senderType.equals(senderType)) {
+			// TODO change if become a list
+			return false;
+		}
+		if (_messageType == null || messageType == null || !_messageType.equals(messageType)) {
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isNeighboursStateValid(List<List<ServicesStateVR>> actualState) {
 		// TODO may require some changes if we use multiple connections for one
 		// service
-		Boolean isV = true;
+		boolean isV = true;
 		if (actualState.size() == neightboursState.size()) {
 			// The size is good: normal behavior
 			for (int i = 0; i < actualState.size(); i++) {
-				if (!hasCorrelation(actualState.get(i), neightboursState.get(i))) {
+				if (!hasSimpleCorrelation(actualState.get(i), neightboursState.get(i))) {
 					// Context agent is not valid for this criteria
 					isV = false;
 					break;
@@ -179,8 +257,8 @@ public class ContextAgent extends Agent {
 		return isV;
 	}
 
-	private Boolean hasCorrelation(List<ServicesStateVR> list1, List<ServicesStateVR> list2) {
-		Boolean isSimplyCorralated = false;
+	private boolean hasSimpleCorrelation(List<ServicesStateVR> list1, List<ServicesStateVR> list2) {
+		boolean isSimplyCorralated = false;
 		for (int i = 0; i < list1.size(); i++) {
 			if (list2.contains(list1.get(i))) // TODO need to be modify if we
 												// change same instance or not
