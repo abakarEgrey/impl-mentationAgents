@@ -14,15 +14,16 @@ public class ContextAgent extends Agent {
 	private String expeditorType; // List<String>?
 	private Action messageType;
 	private List<List<ServicesStateVR>> neightboursState;
-	private Boolean serviceAgentState;
+	//private Boolean serviceAgentState;
 	private String typeConnectedAgent;
-	// private int nbOfConnection
-	// private double averageTOConnexion;
-	// private Cardinality
+    private int nbOfConnection;
+	private double averageTOConnexion;
+	private int cardinality;
+	private Pair<Boolean, List<Agent>> serviceAgentState;
 
 	// Constructor
 	public ContextAgent(String expeditorType, Action messageType, List<List<ServicesStateVR>> neightboursState,
-			Boolean serviceAgentState, String typeConnectedAgent) {
+			Pair<Boolean, List<Agent>> serviceAgentState, String typeConnectedAgent) {
 		this.expeditorType = expeditorType;
 		this.messageType = messageType;
 		this.neightboursState = neightboursState;
@@ -30,6 +31,8 @@ public class ContextAgent extends Agent {
 		this.typeConnectedAgent = typeConnectedAgent;
 	}
 
+	//Constructor bis
+	
 	// ***Accessor and
 
 	// @Override
