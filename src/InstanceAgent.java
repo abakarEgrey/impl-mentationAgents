@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -47,7 +48,8 @@ public class InstanceAgent extends Agent{
 
 	
 	public List<Pair<Boolean, List<Agent>>> getChildrenState() {
-		// TODO Auto-generated method stub		
+		// TODO Auto-generated method stub	
+		return null;
 	}
 
 
