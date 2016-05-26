@@ -21,6 +21,7 @@ public class ContextAgent extends Agent {
 	private List<Pair<Boolean, String>> neightboursState; // (same instance, agent type)
 	private boolean serviceAgentState;
 	private String typeConnectedAgent;
+	private Action actionPerformed; 
 	// private int nbOfConnection
 	// private double averageTOConnexion;
 	// private Cardinality
