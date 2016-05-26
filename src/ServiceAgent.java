@@ -11,7 +11,6 @@ public class ServiceAgent extends Agent{
 
 	private Pair<Boolean, List<Agent>> isConnected;
 
-	private Pair<Boolean, List<ServiceAgent>> isConnected;
 	private Agent connectedAgent;
 
 	//TODO messages from other services agents and from 

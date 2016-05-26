@@ -4,8 +4,9 @@ import java.util.Set;
 public class ContextAgent extends Agent {
 
 	// TODO General TODO: make criterion variables?
-
+    private final Double LAMBDA = 0.2;
 	// Properties
+	private Boolean serviceAgentReponse;
 	private double confidence;
 	private ServiceAgent serviceAgent;
 	private boolean isValid;
@@ -17,8 +18,7 @@ public class ContextAgent extends Agent {
 	// Ranges of Validity
 	private String senderType; // List<String>?
 	private Action messageType;
-<<<<<<< HEAD
-	private List<List<ServicesStateVR>> neightboursState;
+	//private List<List<ServicesStateVR>> neightboursState;
 	//private Boolean serviceAgentState;
 	private String typeConnectedAgent;
     private int nbOfConnection;
@@ -26,15 +26,9 @@ public class ContextAgent extends Agent {
 	private int cardinality;
 	private Pair<Boolean, List<Agent>> serviceAgentState;
 
-	// Constructor
-	public ContextAgent(String expeditorType, Action messageType, List<List<ServicesStateVR>> neightboursState,
-			Pair<Boolean, List<Agent>> serviceAgentState, String typeConnectedAgent) {
-		this.expeditorType = expeditorType;
-=======
+	
 	//private List<List<ServicesStateVR>> neightboursState;
 	private List<Pair<Boolean, String>> neightboursState; // (same instance, agent type)
-	private boolean serviceAgentState;
-	private String typeConnectedAgent;
 	private Action actionPerformed; 
 	// private int nbOfConnection
 	// private double averageTOConnexion;
@@ -51,22 +45,33 @@ public class ContextAgent extends Agent {
 //	}
 	
 	public ContextAgent(String senderType, Action messageType, List<Pair<Boolean, String>> neightboursState,
-			boolean serviceAgentState, String typeConnectedAgent) {
+			Pair<Boolean, List<Agent>> serviceAgentState, String typeConnectedAgent, Action actionPermed) {
 		this.senderType = senderType;
->>>>>>> 2ebe6b34b90b50548e8f8323b286c02fa29c15f3
+
 		this.messageType = messageType;
 		this.neightboursState = neightboursState;
 		this.serviceAgentState = serviceAgentState;
 		this.typeConnectedAgent = typeConnectedAgent;
+		this.actionPerformed = actionPermed;
 	}
 
-<<<<<<< HEAD
-	//Constructor bis
+	public ContextAgent(String senderType, Action messageType, List<Pair<Boolean, String>> neightboursState,
+			Pair<Boolean, List<Agent>> serviceAgentState, String typeConnectedAgent, Action actionPermed, int cardinality, int nbOfConnection, Double averageTOConnexion) {
+		this.senderType = senderType;
+
+		this.messageType = messageType;
+		this.neightboursState = neightboursState;
+		this.serviceAgentState = serviceAgentState;
+		this.typeConnectedAgent = typeConnectedAgent;
+		this.actionPerformed = actionPermed;
+		this.cardinality = cardinality;
+		this.nbOfConnection = nbOfConnection;
+		this.averageTOConnexion = averageTOConnexion;
+	}
 	
 	// ***Accessor and
-=======
+
 	//Accessors and mutators
->>>>>>> 2ebe6b34b90b50548e8f8323b286c02fa29c15f3
 
 
 	public double getConfidence() {
@@ -274,7 +279,7 @@ public class ContextAgent extends Agent {
 			return false;
 		}
 		
-		vérifier le critère de m^me instancre
+		//vérifier le critère de m^me instancre
 		return true;
 	}
 
@@ -329,5 +334,10 @@ public class ContextAgent extends Agent {
 //
 //		return isSimplyCorralated;
 //	}
+	//Cette methode permet de calculer la recompense de l'agent contexte
+	private void calculateConfidence() {
+		int res = (serviceAgentReponse) ? 1 : 0;
+		this.confidence  = (1 - LAMBDA)*this.confidence + LAMBDA*res;
+	}
 
 }

@@ -7,7 +7,7 @@ public class MessageAgent<T> extends Ref<T> implements IMsgBox<T>{
 	}
 
 	@Override
-	public Ref<T> getRef() {
+	public fr.irit.smac.libs.tooling.messaging.impl.Ref<T> getRef() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -19,9 +19,11 @@ public class MessageAgent<T> extends Ref<T> implements IMsgBox<T>{
 	}
 
 	@Override
-	IMsgSink<T> getMsgSink() {
+	public fr.irit.smac.libs.tooling.messaging.impl.messagecontainer.IMsgSink<T> getMsgSink() {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	
 
 }
