@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -12,23 +13,14 @@ public class ContextAgent extends Agent {
 	private boolean isValid;
 	private List<String> correspondingMessages; // TODO to change for actual
 												// type
-
+	private List<ServiceAgentMessage> listServiceAgentMessage;
 	// TODO id??
 
 	// Ranges of Validity
-	private String senderType; // List<String>?
-	private Action messageType;
-	//private List<List<ServicesStateVR>> neightboursState;
-	//private Boolean serviceAgentState;
-	private String typeConnectedAgent;
-    private int nbOfConnection;
-	private double averageTOConnexion;
-	private int cardinality;
-	private Pair<Boolean, List<Agent>> serviceAgentState;
-
+	 
 	
 	//private List<List<ServicesStateVR>> neightboursState;
-	private List<Pair<Boolean, String>> neightboursState; // (same instance, agent type)
+	private  List<Pair<Boolean, List<ServiceAgent>>> neightboursState; // (same instance, agent type)
 	private Action actionPerformed; 
 	// private int nbOfConnection
 	// private double averageTOConnexion;
@@ -43,9 +35,18 @@ public class ContextAgent extends Agent {
 //		this.serviceAgentState = serviceAgentState;
 //		this.typeConnectedAgent = typeConnectedAgent;
 //	}
-	
-	public ContextAgent(String senderType, Action messageType, List<Pair<Boolean, String>> neightboursState,
-			Pair<Boolean, List<Agent>> serviceAgentState, String typeConnectedAgent, Action actionPermed) {
+	/**
+	 * 
+	 * @param senderType
+	 * @param messageType
+	 * @param neightboursState
+	 * @param serviceAgentState
+	 * @param typeConnectedAgent
+	 * @param actionPermed
+	 * @param serviceAgent
+	 */
+	public ContextAgent(String senderType, Action messageType,  List<Pair<Boolean, List<ServiceAgent>>> neightboursState,
+			Pair<Boolean, List<Agent>> serviceAgentState, Action actionPermed, ServiceAgent serviceAgent, double confidence) {
 		this.senderType = senderType;
 
 		this.messageType = messageType;
@@ -53,10 +54,24 @@ public class ContextAgent extends Agent {
 		this.serviceAgentState = serviceAgentState;
 		this.typeConnectedAgent = typeConnectedAgent;
 		this.actionPerformed = actionPermed;
-	}
-
-	public ContextAgent(String senderType, Action messageType, List<Pair<Boolean, String>> neightboursState,
-			Pair<Boolean, List<Agent>> serviceAgentState, String typeConnectedAgent, Action actionPermed, int cardinality, int nbOfConnection, Double averageTOConnexion) {
+		this.serviceAgent = serviceAgent;
+		this.confidence = confidence;
+		this.listServiceAgentMessage = new ArrayList<ServiceAgentMessage>();
+		}
+	/**
+	 * 
+	 * @param senderType
+	 * @param messageType
+	 * @param neightboursState
+	 * @param serviceAgentState
+	 * @param actionPermed
+	 * @param cardinality
+	 * @param nbOfConnection
+	 * @param averageTOConnexion
+	 * @param serviceAgent
+	 */
+	public ContextAgent(String senderType, Action messageType, List<Pair<Boolean, List<ServiceAgent>>> neightboursState,
+			Pair<Boolean, List<Agent>> serviceAgentState, Action actionPermed, int cardinality, int nbOfConnection, Double averageTOConnexion, ServiceAgent serviceAgent, double confidence) {
 		this.senderType = senderType;
 
 		this.messageType = messageType;
@@ -67,6 +82,8 @@ public class ContextAgent extends Agent {
 		this.cardinality = cardinality;
 		this.nbOfConnection = nbOfConnection;
 		this.averageTOConnexion = averageTOConnexion;
+		this.serviceAgent = serviceAgent;
+		this.confidence = confidence;
 	}
 	
 	// ***Accessor and
