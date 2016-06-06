@@ -179,5 +179,9 @@ public class ServiceAgent extends Agent {
 	public List<ServiceAgent> getConnectedAgents() {
 		return isConnected.getSecond();
 	}
+	
+	public Pair<Boolean, List<Agent>> getCurrentServiceState() {
+		return isConnected;
+	}
 
 }
