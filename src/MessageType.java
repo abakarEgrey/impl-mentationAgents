@@ -1,4 +1,4 @@
 
 public enum MessageType {
-	PROPOSITIONAC , MASERVICE;
+	PROPOSITIONAC , SAMESSAGE;
 }

@@ -12,7 +12,6 @@ public class ServiceAgent extends Agent {
 	private static final double RECOMPENSE = 0.5;
 	private Pair<Boolean, ArrayList<ServiceAgent>> isConnected;
 
-	private Agent connectedAgent;
 
 	// TODO messages from other services agents and from
 	private ArrayList<ContextAgent> contextAgents;
@@ -31,8 +30,10 @@ public class ServiceAgent extends Agent {
 	Map<ServiceAgentMessage, ArrayList<Pair<ContextAgent, Action>>> listProp;
 
 	//Message related attributes
-	private String id;
+	//private String id; already in agent
+	
 	private IMsgBox<AbstractMessage> messageBox;
+	private SAMsgBoxHistoryAgent msgBoxHAgent;
 	
 	// private HashMap<Agent, Pair<Boolean, ArrayList<Agent>>> etatsVoisins;
 	// Constructor ServiceAgent
@@ -48,17 +49,12 @@ public class ServiceAgent extends Agent {
 		this.contextPropositions = new ArrayList<ContextAgentProposition>();
 		listProp = new HashMap<ServiceAgentMessage, ArrayList<Pair<ContextAgent,Action>>>();
 		messageBox = (IMsgBox<AbstractMessage>) AgentMessaging.getMsgBox(id, AbstractMessage.class);
-		messageBox.send
+		msgBoxHAgent = new SAMsgBoxHistoryAgent(this);
 	}
 
 	
 	// Acessors
-	// TODO maybe to change
-	public ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> getNeighboursState() {
-		return instanceAgent.getChildrenState();
-		//TODO : check instance and change the list to List(same instance, Service agent)
-	}
-
+	
 	// Life Cycle
 	@Override
 	protected void perceive() {
@@ -187,6 +183,15 @@ public class ServiceAgent extends Agent {
 	
 	public Pair<Boolean, ArrayList<ServiceAgent>> getCurrentServiceState() {
 		return isConnected;
+	}
+	
+	public ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> getActualNeighboursState(){
+		return  instanceAgent.getActualNeighboursState(this);
+	}
+
+	public ArrayList<Pair<Boolean, ArrayList<ServiceAgent>>> getActualServicesState() {
+		return instanceAgent.getChildrenState();
+		//TODO : check instance and change the list to List(same instance, Service agent)
 	}
 
 }

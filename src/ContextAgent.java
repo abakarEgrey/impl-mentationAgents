@@ -179,7 +179,7 @@ public class ContextAgent extends Agent {
 		
 		if (isBasicCriterionValid(serviceAgent.getCurrentServiceState())) {
 			// Neightbours
-			ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> _actualNeighboursState = getNeighboursState();
+			ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> _actualNeighboursState = getActualNeighboursState();
 			if (isNeighboursStateValid(_actualNeighboursState)) {
 //				if {
 //					// The messages
@@ -215,8 +215,8 @@ public class ContextAgent extends Agent {
 
 	// Methodes used during Life Cycle
 
-	private ArrayList< ArrayList<Pair<Boolean,ServiceAgent>>> getNeighboursState() {
-		ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> actualNeighboursState = serviceAgent.getNeighboursState();
+	private ArrayList< ArrayList<Pair<Boolean,ServiceAgent>>> getActualNeighboursState() {
+		ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> actualNeighboursState = serviceAgent.getActualNeighboursState();
 		if (actualNeighboursState.size() == neightboursState.size()) {
 			// The size is good: normal behavior
 		} else {
@@ -229,53 +229,6 @@ public class ContextAgent extends Agent {
 		return serviceAgent.getConnectedAgents();
 	}
 
-	// /**
-	// *
-	// * @param _senderType
-	// * : the type of the InstanceAgent of the sender (which is a
-	// * ServiceAgent)
-	// * @param _messageType
-	// * : the type of the message (see Action)
-	// * @param _actualState
-	// * : the state (connected and with who) of the other
-	// * ServiceAgents of the InstanceAgent
-	// * @param _serviceAgentState
-	// * : the state (connected) of the serviceAgent
-	// * @param _typeConnectedAgent
-	// * : the type of the ServiceAgent with which the serviceAgent is
-	// * connected
-	// * @return : if the context agent is valid i.e. if the context is
-	// reproduced
-	// */
-	// private boolean isContextAgentValid(String _senderType, Action
-	// _messageType,
-	// List<List<ServicesStateVR>> _actualState, boolean _serviceAgentState,
-	// String _typeConnectedAgent) {
-	// // If one criteria is not valid, the context is not valid
-	// if (_senderType == null || senderType == null ||
-	// !_senderType.equals(senderType)) {
-	// // TODO change if become a list
-	// return false;
-	// }
-	// if (_messageType == null || messageType == null ||
-	// !_messageType.equals(messageType)) {
-	// return false;
-	// }
-	// if (!((serviceAgentState && _serviceAgentState) || ((!serviceAgentState)
-	// && (!_serviceAgentState)))) {
-	// // TODO may need to be changed if bool can become either
-	// return false;
-	// }
-	// if (_typeConnectedAgent == null || typeConnectedAgent == null
-	// || !typeConnectedAgent.equals(_typeConnectedAgent)) {
-	// // TODO change if become a list with correlation?
-	// return false;
-	// }
-	// if (!isNeighboursStateValid(_actualState)) {
-	// return false;
-	// }
-	// return true;
-	// }
 
 	/**
 	 * @param _serviceAgentState
