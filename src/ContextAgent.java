@@ -22,14 +22,14 @@ public class ContextAgent extends Agent {
 	// private double averageTOConnexion;
 	// private Cardinality
 
-	private ArrayList<Pair<Boolean, ArrayList<ServiceAgent>>> neightboursState; // (same
+	private ArrayList<Pair<Boolean, String>> neightboursState; // (same
 																		// instance,
 																		// agent
 																		// type)
 	private Action actionPerformed;
 	private String senderType;
 	private Action messageType;
-	private Pair<Boolean, ArrayList<String>> serviceAgentState;
+	private Pair<Boolean,String> serviceAgentState;
 
 	// Necessary for the perceive-decide-act cycle distinction
 	private boolean isValid;
@@ -57,8 +57,8 @@ public class ContextAgent extends Agent {
 	 * @param serviceAgent
 	 * @param confidence
 	 */
-	public ContextAgent(String senderType, Action messageType, ArrayList<Pair<Boolean, ArrayList<ServiceAgent>>> neightboursState,
-			Pair<Boolean, ArrayList<String>> serviceAgentState, Action actionPerformed, ServiceAgent serviceAgent,
+	public ContextAgent(String senderType, Action messageType, ArrayList<Pair<Boolean, String>> neightboursState,
+			Pair<Boolean,String> serviceAgentState, Action actionPerformed, ServiceAgent serviceAgent,
 			double confidence) {
 		this.senderType = senderType;
 
@@ -138,11 +138,11 @@ public class ContextAgent extends Agent {
 		this.messageType = messageType;
 	}
 
-	public ArrayList<Pair<Boolean, ArrayList<ServiceAgent>>> getNeightboursState() {
+	public ArrayList<Pair<Boolean, String>> getNeightboursState() {
 		return neightboursState;
 	}
 
-	private void setNeightboursState(ArrayList<Pair<Boolean, ArrayList<ServiceAgent>>> neightboursState) {
+	private void setNeightboursState(ArrayList<Pair<Boolean, String>> neightboursState) {
 		this.neightboursState = neightboursState;
 	}
 
@@ -154,11 +154,11 @@ public class ContextAgent extends Agent {
 		this.actionPerformed = actionPerformed;
 	}
 
-	public Pair<Boolean, ArrayList<String>> getServiceAgentState() {
+	public Pair<Boolean, String> getServiceAgentState() {
 		return serviceAgentState;
 	}
 
-	private void setServiceAgentState(Pair<Boolean, ArrayList<String>> serviceAgentState) {
+	private void setServiceAgentState(Pair<Boolean, String> serviceAgentState) {
 		this.serviceAgentState = serviceAgentState;
 	}
 
@@ -179,15 +179,18 @@ public class ContextAgent extends Agent {
 		
 		if (isBasicCriterionValid(serviceAgent.getCurrentServiceState())) {
 			// Neightbours
-			ArrayList<Pair<Boolean, ArrayList<ServiceAgent>>> _actualNeighboursState = getNeighboursState();
+			ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> _actualNeighboursState = getNeighboursState();
 			if (isNeighboursStateValid(_actualNeighboursState)) {
-				// The messages
-
-				// TODO Read every messages of its service agent until it found
-				// the
-				// good message
-				// Try for each is valid
-				// If valid for a message stock it in a list
+//				if {
+//					// The messages
+//
+//					// TODO Read every messages of its service agent until it found
+//					// the
+//					// good message
+//					// Try for each is valid
+//					// If valid for a message stock it in a list
+//				}
+				isValid = true;
 			}
 
 		}
@@ -198,7 +201,6 @@ public class ContextAgent extends Agent {
 		// A contextAgent may be valid for multiple messages, for all those
 		// messages he will send a proposition to its service agent
 		// No real decision
-
 	}
 
 	@Override
@@ -213,8 +215,8 @@ public class ContextAgent extends Agent {
 
 	// Methodes used during Life Cycle
 
-	private ArrayList<Pair<Boolean, ArrayList<ServiceAgent>>> getNeighboursState() {
-		ArrayList<Pair<Boolean, ArrayList<ServiceAgent>>> actualNeighboursState = serviceAgent.getNeighboursState();
+	private ArrayList< ArrayList<Pair<Boolean,ServiceAgent>>> getNeighboursState() {
+		ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> actualNeighboursState = serviceAgent.getNeighboursState();
 		if (actualNeighboursState.size() == neightboursState.size()) {
 			// The size is good: normal behavior
 		} else {
@@ -294,11 +296,25 @@ public class ContextAgent extends Agent {
 		}
 		
 		// Check if one of the connection is correlated with the type range	
-		if (hasSimpleTypeCorrelation(serviceAgentState.getSecond(),_actualServiceAgentState.getSecond())) { 
+		//if (hasSimpleTypeCorrelation(serviceAgentState.getSecond(),_actualServiceAgentState.getSecond())) { 
+		if (!isServiceAgentConnectedTypeValid(_actualServiceAgentState)) {
 			return false; 
 		}
 
 		return true;
+	}
+	
+	private boolean isServiceAgentConnectedTypeValid (Pair<Boolean, ArrayList<ServiceAgent>> _actualServiceAgentState){
+		isValid = false;
+		ArrayList<ServiceAgent> servicesAgent = _actualServiceAgentState.getSecond();
+		for (int i=0; i< servicesAgent.size(); i++){
+			if ( servicesAgent.get(i).getClass().getName().equals(serviceAgentState.getSecond()))
+					{
+						isValid = true;
+						break;
+					}
+		}
+		return isValid;
 	}
 
 	/**
@@ -324,27 +340,21 @@ public class ContextAgent extends Agent {
 		return true;
 	}
 
-	private boolean isNeighboursStateValid(ArrayList<Pair<Boolean, ArrayList<ServiceAgent>>> actualNeighboursState) {
+	private boolean isNeighboursStateValid(ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> actualNeighboursState) {
 
 		boolean isV = true;
 
 		if (actualNeighboursState.size() == neightboursState.size()) {
-			ArrayList<ServiceAgent> actualNState;
+			ArrayList<Pair<Boolean,ServiceAgent>> actualNState;
 			boolean isNeiV = false;
 
 			// The size is good: normal behavior
-			// Look for every neightbour if the expected neightbour context
-			// really is
+			// Look for every neighbour (isNeiV) if the expected neighbour context
+			// really is 
 			for (int i = 0; i < actualNeighboursState.size(); i++) {
-				isNeiV = false;
-
-				actualNState = actualNeighboursState.get(i).getSecond();
-				for (int j = 0; j < actualNState.size(); j++) {
-					if (actualNState.get(j).getClass().getName() == neightboursState.get(i).getSecond()) {// TODO
-						isNeiV = true;
-						break;
-					}
-				}
+				actualNState = actualNeighboursState.get(i);
+				isNeiV = isNeighbourV(actualNState);
+			
 				if (!isNeiV) {
 					isV = false;
 					break;
@@ -357,6 +367,22 @@ public class ContextAgent extends Agent {
 		return isV;
 	}
 
+	private boolean isNeighbourV (ArrayList<Pair<Boolean,ServiceAgent>> actualNState){
+		boolean isNeiV = false;
+		//Search a simple correlation
+		for (int j = 0; j < actualNState.size(); j++) {
+			if ((actualNState.get(j).getFirst() && neightboursState.get(j).getFirst()) || 
+					((!actualNState.get(j).getFirst()) && (!neightboursState.get(j).getFirst())) )
+			{
+				if (actualNState.get(j).getSecond().getClass().getName().equals(neightboursState.get(j).getSecond())) {
+					isNeiV = true;
+					break;
+				}
+			}
+		}
+		return isNeiV;
+	}
+	
 	static <T> boolean hasSimpleCorrelation(ArrayList<T> list1, ArrayList<T> list2){ 
 		boolean isSimplyCorralated = false;
 		T item;
@@ -386,11 +412,32 @@ public class ContextAgent extends Agent {
 		}
 		return hasSimpleCorrelation(list1, temp2);
 	}
+	
+	
+//	static boolean hasDoubleCorrelation(ArrayList<Pair<Boolean, ArrayList<ServiceAgent>>> list1, ArrayList<Pair<Boolean, ArrayList<ServiceAgent>>> list2){ 
+//		boolean isSimplyCorralated = false;
+////		T item;
+////		for (int i = 0; i < list1.size(); i++){
+////			item = list1.get(i);
+////			if (list2.contains(item)) {
+////				// TODO need to be modify if we
+////				// change same instance or not
+////				//same instance to be possibly
+////				//either
+////				
+////					isSimplyCorralated = true;
+////					break;
+////			}
+////		}
+////	
+////	 return isSimplyCorralated;
+//	}
+	
 
+	
 	public void useFeedback (Boolean serviceAgentReponse){
 		calculateConfidence(serviceAgentReponse);
 	}
-	
 	
 	// Cette methode permet de calculer la recompense de l'agent contexte
 	private void calculateConfidence(Boolean serviceAgentReponse) {

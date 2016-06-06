@@ -1,57 +1,59 @@
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.Set;
+
+import fr.irit.smac.libs.tooling.messaging.AgentMessaging;
+import fr.irit.smac.libs.tooling.messaging.IMsgBox;
 
 public class ServiceAgent extends Agent {
 	// Properties
 	private static final double RECOMPENSE = 0.5;
-	private Pair<Boolean, List<ServiceAgent>> isConnected;
+	private Pair<Boolean, ArrayList<ServiceAgent>> isConnected;
 
 	private Agent connectedAgent;
 
 	// TODO messages from other services agents and from
-	private List<ContextAgent> contextAgents;
+	private ArrayList<ContextAgent> contextAgents;
 	private InstanceAgent instanceAgent;
 	private Map<String, Pair<Integer, Double>> nbConnectEtTempMoy;
-	private Queue<MessageAgent> messagesBox;
+//	private Queue<MessageAgent> messagesBox;
 	// action choisie et le dernier message de l'agent service sont mis à jour
 	// par la methode decider
 	private Action choosenAction;
 	private ServiceAgentMessage lastMessage;
 	//private Map<String, Action> contextAgentPropositions;
 	// liste contenant les propositions des agents contextes
-	private List<ContextAgentProposition> contextPropositions;
-	Map<ServiceAgentMessage, List<Pair<ContextAgent, Action>>> listProp;
+	private ArrayList<ContextAgentProposition> contextPropositions;
+	Map<ServiceAgentMessage, ArrayList<Pair<ContextAgent, Action>>> listProp;
 
-	// private HashMap<Agent, Pair<Boolean, List<Agent>>> etatsVoisins;
+	//
+	private IMsgBox<AbstractMessage> messageBox;
+	
+	// private HashMap<Agent, Pair<Boolean, ArrayList<Agent>>> etatsVoisins;
 	// Constructor ServiceAgent
 	public ServiceAgent(String id, InstanceAgent pere) {
 		this.name = id;
 		this.instanceAgent = pere;
 		this.contextAgents = new ArrayList<ContextAgent>();
 		this.nbConnectEtTempMoy = new HashMap<String, Pair<Integer, Double>>();
-		this.messagesBox = new PriorityQueue<MessageAgent>();
+//		this.messagesBox = new PriorityQueue<MessageAgent>();
 		choosenAction = null;
 		lastMessage = null;
 		//this.contextAgentPropositions = new HashMap<String, Action>();
 		this.contextPropositions = new ArrayList<ContextAgentProposition>();
-		listProp = new HashMap<ServiceAgentMessage, List<Pair<ContextAgent,Action>>>();
+		listProp = new HashMap<ServiceAgentMessage, ArrayList<Pair<ContextAgent,Action>>>();
+		messageBox = (IMsgBox<AbstractMessage>) AgentMessaging.getMsgBox(name, AbstractMessage.class);
+		messageBox.getMsgs()
 	}
 
+	
 	// Acessors
 	// TODO maybe to change
-	public List<Pair<Boolean, List<ServiceAgent>>> getNeighboursState() {
+	public ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> getNeighboursState() {
 		return instanceAgent.getChildrenState();
+		//TODO : check instance and change the list to List(same instance, Service agent)
 	}
 
 	// Life Cycle
@@ -69,14 +71,14 @@ public class ServiceAgent extends Agent {
 	 * Cette méthode permet de traiter les messages
 	 * @return
 	 */
-	private Map<ServiceAgentMessage, List<Pair<ContextAgent, Action>>> treatPrositionsList() {
+	private Map<ServiceAgentMessage, ArrayList<Pair<ContextAgent, Action>>> treatPrositionsList() {
 		// TODO Auto-generated method stub
-		Map<ServiceAgentMessage, List<Pair<ContextAgent, Action>>> propositionsList = new HashMap<ServiceAgentMessage, List<Pair<ContextAgent, Action>>>();
+		Map<ServiceAgentMessage, ArrayList<Pair<ContextAgent, Action>>> propositionsList = new HashMap<ServiceAgentMessage, ArrayList<Pair<ContextAgent, Action>>>();
 		// trier les propositions
 		for (ContextAgentProposition c : this.contextPropositions) {
 			ServiceAgentMessage message = c.getServiceAgentMessage();
 			if (propositionsList.containsKey(message)) {
-				List<Pair<ContextAgent, Action>> listContextAction = propositionsList
+				ArrayList<Pair<ContextAgent, Action>> listContextAction = propositionsList
 						.get(message);
 				// ajouter la proposition de l'agent contexte à la liste des
 				// agents contextes qui sont pour le message "message"
@@ -84,7 +86,7 @@ public class ServiceAgent extends Agent {
 						.getContextAgent(), c.getAction()));
 				propositionsList.put(message, listContextAction);
 			} else {
-				List<Pair<ContextAgent, Action>> newList = new ArrayList<Pair<ContextAgent,Action>>();
+				ArrayList<Pair<ContextAgent, Action>> newList = new ArrayList<Pair<ContextAgent,Action>>();
 				newList.add(new Pair<ContextAgent, Action>(c.getContextAgent(), c.getAction()));
 				propositionsList.put(message, newList);
 			}
@@ -98,7 +100,7 @@ public class ServiceAgent extends Agent {
 		// update attribute choosenAction and last message.
 		// ...
 		
-		this.creerFils();
+		//this.creerFils();
 	}
 
 	@Override
@@ -116,16 +118,16 @@ public class ServiceAgent extends Agent {
 	/**
 	 * This fonction allows to create a new contextAgent
 	 */
-	private void creerFils() {
-		ContextAgent contextAgent = new ContextAgent(
-				lastMessage.getSenderType(), lastMessage.getMessageType(),
-				this.instanceAgent.getChildrenState(), this.isConnected,
-				this.choosenAction, lastMessage.getCardinality(),
-				lastMessage.getNbOfConnection(),
-				lastMessage.getAverageTOConnexion(), this, RECOMPENSE);
-
-		this.contextAgents.add(contextAgent);
-	}
+//	private void creerFils() {
+//		ContextAgent contextAgent = new ContextAgent(
+//				lastMessage.getSenderType(), lastMessage.getMessageType(),
+//				this.instanceAgent.getChildrenState(), this.isConnected,
+//				this.choosenAction, lastMessage.getCardinality(),
+//				lastMessage.getNbOfConnection(),
+//				lastMessage.getAverageTOConnexion(), this, RECOMPENSE);
+//
+//		this.contextAgents.add(contextAgent);
+//	}
 
 	/**
 	 * This fonction allows to add a new parameter to a context agent
@@ -135,7 +137,7 @@ public class ServiceAgent extends Agent {
 	 */
 	public void addParameter(String[] typeLabel) {
 		/*
-		 * String type = typeLabel[0]; String label = typeLabel[1]; List<String>
+		 * String type = typeLabel[0]; String label = typeLabel[1]; ArrayList<String>
 		 * filePathList = new ArrayList<String>(); // get the project directory:
 		 * for example, the directory // impl-mentationsAgents directory String
 		 * localPath = System.getProperty("user.dir"); // get all .java
@@ -176,11 +178,11 @@ public class ServiceAgent extends Agent {
 		return isConnected.getFirst();
 	}
 
-	public List<ServiceAgent> getConnectedAgents() {
+	public ArrayList<ServiceAgent> getConnectedAgents() {
 		return isConnected.getSecond();
 	}
 	
-	public Pair<Boolean, List<ServiceAgent>> getCurrentServiceState() {
+	public Pair<Boolean, ArrayList<ServiceAgent>> getCurrentServiceState() {
 		return isConnected;
 	}
 

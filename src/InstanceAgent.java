@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -5,7 +6,7 @@ import java.util.Set;
 public class InstanceAgent extends Agent{
 //Properties
 	//id
-	private List<ServiceAgent> ServiceAgents;
+	private ArrayList<ServiceAgent> ServiceAgents;
 	
 	
 	
@@ -47,8 +48,8 @@ public class InstanceAgent extends Agent{
 	}
 
 	
-	public List<Pair<Boolean, List<ServiceAgent>>> getChildrenState() {
-		// TODO Auto-generated method stub	
+	public  ArrayList<ArrayList<Pair<Boolean,ServiceAgent>>> getChildrenState() {
+		// TODO Auto-generated method stub	: do
 		return null;
 	}
 

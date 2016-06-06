@@ -113,8 +113,8 @@ public class SequentialSystemStrategyForOppoCompo extends AbstractSystemStrategy
 	@Override
 	protected void doStep()
 	{
-
-		pauseLock.lock();
+//TODO
+		//pauseLock.lock();
 
 		addPendingAgents();
 		try
@@ -131,8 +131,8 @@ public class SequentialSystemStrategyForOppoCompo extends AbstractSystemStrategy
 		}
 
 		removePendingAgents();
-
-		pauseLock.unlock();
+//TODO
+		//pauseLock.unlock();
 
 		/*if(Context.affichage)
 		System.out.println("----------- "+currentAgent);*/
