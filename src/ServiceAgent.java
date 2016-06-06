@@ -22,20 +22,23 @@ public class ServiceAgent extends Agent {
 	// action choisie et le dernier message de l'agent service sont mis à jour
 	// par la methode decider
 	private Action choosenAction;
-	private ServiceAgentMessage lastMessage;
+	private ServiceAgentMessage lastMessage; //TODO ?????????????
 	//private Map<String, Action> contextAgentPropositions;
+	
+	
 	// liste contenant les propositions des agents contextes
 	private ArrayList<ContextAgentProposition> contextPropositions;
 	Map<ServiceAgentMessage, ArrayList<Pair<ContextAgent, Action>>> listProp;
 
-	//
+	//Message related attributes
+	private String id;
 	private IMsgBox<AbstractMessage> messageBox;
 	
 	// private HashMap<Agent, Pair<Boolean, ArrayList<Agent>>> etatsVoisins;
 	// Constructor ServiceAgent
-	public ServiceAgent(String id, InstanceAgent pere) {
-		this.name = id;
-		this.instanceAgent = pere;
+	public ServiceAgent(String id, InstanceAgent parent) {
+		this.id = id;
+		this.instanceAgent = parent;
 		this.contextAgents = new ArrayList<ContextAgent>();
 		this.nbConnectEtTempMoy = new HashMap<String, Pair<Integer, Double>>();
 //		this.messagesBox = new PriorityQueue<MessageAgent>();
@@ -44,8 +47,8 @@ public class ServiceAgent extends Agent {
 		//this.contextAgentPropositions = new HashMap<String, Action>();
 		this.contextPropositions = new ArrayList<ContextAgentProposition>();
 		listProp = new HashMap<ServiceAgentMessage, ArrayList<Pair<ContextAgent,Action>>>();
-		messageBox = (IMsgBox<AbstractMessage>) AgentMessaging.getMsgBox(name, AbstractMessage.class);
-		messageBox.getMsgs()
+		messageBox = (IMsgBox<AbstractMessage>) AgentMessaging.getMsgBox(id, AbstractMessage.class);
+		messageBox.send
 	}
 
 	
