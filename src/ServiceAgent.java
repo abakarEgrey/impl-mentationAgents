@@ -15,7 +15,7 @@ import java.util.Set;
 public class ServiceAgent extends Agent {
 	// Properties
 	private static final double RECOMPENSE = 0.5;
-	private Pair<Boolean, List<Agent>> isConnected;
+	private Pair<Boolean, List<ServiceAgent>> isConnected;
 
 	private Agent connectedAgent;
 
@@ -180,7 +180,7 @@ public class ServiceAgent extends Agent {
 		return isConnected.getSecond();
 	}
 	
-	public Pair<Boolean, List<Agent>> getCurrentServiceState() {
+	public Pair<Boolean, List<ServiceAgent>> getCurrentServiceState() {
 		return isConnected;
 	}
 
