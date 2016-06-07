@@ -17,8 +17,6 @@ public class ServiceAgent extends Agent {
 	private static final double RECOMPENSE = 0.5;
 	private Pair<Boolean, List<Agent>> isConnected;
 
-	private Agent connectedAgent;
-
 	// TODO messages from other services agents and from
 	private List<ContextAgent> contextAgents;
 	private InstanceAgent instanceAgent;
@@ -28,10 +26,12 @@ public class ServiceAgent extends Agent {
 	// par la methode decider
 	private Action choosenAction;
 	private ServiceAgentMessage lastMessage;
-	//private Map<String, Action> contextAgentPropositions;
+	// private Map<String, Action> contextAgentPropositions;
 	// liste contenant les propositions des agents contextes
 	private List<ContextAgentProposition> contextPropositions;
-	Map<ServiceAgentMessage, List<Pair<ContextAgent, Action>>> listProp;
+	private Map<ServiceAgentMessage, List<Pair<ContextAgent, Action>>> listProp;
+	// une liste contenant l'ensemble des actions durant un cycle
+	private List<Action> listAction;
 
 	// private HashMap<Agent, Pair<Boolean, List<Agent>>> etatsVoisins;
 	// Constructor ServiceAgent
@@ -43,9 +43,10 @@ public class ServiceAgent extends Agent {
 		this.messagesBox = new PriorityQueue<MessageAgent>();
 		choosenAction = null;
 		lastMessage = null;
-		//this.contextAgentPropositions = new HashMap<String, Action>();
+		// this.contextAgentPropositions = new HashMap<String, Action>();
 		this.contextPropositions = new ArrayList<ContextAgentProposition>();
-		listProp = new HashMap<ServiceAgentMessage, List<Pair<ContextAgent,Action>>>();
+		listProp = new HashMap<ServiceAgentMessage, List<Pair<ContextAgent, Action>>>();
+		this.listAction = new ArrayList<Action>();
 	}
 
 	// Acessors
@@ -58,18 +59,23 @@ public class ServiceAgent extends Agent {
 	@Override
 	protected void perceive() {
 		// TODO Auto-generated method stub
-		// traiter la liste des propositions des agents contextes selon le type de message au cycle precedent
-		 this.listProp = treatPrositionsList();
-		//on peut ajouter une methode getEnvironmentProperties pour recuperer les caractéristiques de l'environnement
-		//envoyer les messages des agents services aux agents contextes
-		//les agents contextes accèdent directement à la boite de reception de l'agent service.
-		
+		// traiter la liste des propositions des agents contextes selon le type
+		// de message au cycle precedent
+		this.listProp = sortPrositionsList();
+		// on peut ajouter une methode getEnvironmentProperties pour recuperer
+		// les caractéristiques de l'environnement
+		// envoyer les messages des agents services aux agents contextes
+		// les agents contextes accèdent directement à la boite de reception de
+		// l'agent service.
+
 	}
+
 	/**
 	 * Cette méthode permet de traiter les messages
+	 * 
 	 * @return
 	 */
-	private Map<ServiceAgentMessage, List<Pair<ContextAgent, Action>>> treatPrositionsList() {
+	private Map<ServiceAgentMessage, List<Pair<ContextAgent, Action>>> sortPrositionsList() {
 		// TODO Auto-generated method stub
 		Map<ServiceAgentMessage, List<Pair<ContextAgent, Action>>> propositionsList = new HashMap<ServiceAgentMessage, List<Pair<ContextAgent, Action>>>();
 		// trier les propositions
@@ -84,8 +90,9 @@ public class ServiceAgent extends Agent {
 						.getContextAgent(), c.getAction()));
 				propositionsList.put(message, listContextAction);
 			} else {
-				List<Pair<ContextAgent, Action>> newList = new ArrayList<Pair<ContextAgent,Action>>();
-				newList.add(new Pair<ContextAgent, Action>(c.getContextAgent(), c.getAction()));
+				List<Pair<ContextAgent, Action>> newList = new ArrayList<Pair<ContextAgent, Action>>();
+				newList.add(new Pair<ContextAgent, Action>(c.getContextAgent(),
+						c.getAction()));
 				propositionsList.put(message, newList);
 			}
 		}
@@ -97,8 +104,22 @@ public class ServiceAgent extends Agent {
 		// TODO Auto-generated method stub
 		// update attribute choosenAction and last message.
 		// ...
-		
+		// recuperer la liste des messages
+		Set<ServiceAgentMessage> listMessage = this.listProp.keySet();
+		for (ServiceAgentMessage m : listMessage) {
+			if (!this.listProp.get(m).isEmpty()) {
+				Action action = chooseBestAction();
+				this.listAction.add(action);
+			} else {
+				
+			}
+		}
 		this.creerFils();
+	}
+
+	private Action chooseBestAction() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
