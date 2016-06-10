@@ -1,11 +1,12 @@
 
-public class ContextAgentProposition {
+public class ContextAgentProposition extends AbstractMessage{
 	/**
 	 * This class allows to get informations context agents proposals
 	 */
 	private ContextAgent contextAgent;
 	private Action action;
 	private ServiceAgentMessage serviceAgentMessage;
+	private double confidence;
 	
 	/**
 	 * 
@@ -15,10 +16,11 @@ public class ContextAgentProposition {
 	 */
 	public ContextAgentProposition(ContextAgent contextAgent, Action action,
 			ServiceAgentMessage serviceAgentMessage) {
-		super();
+		super(MessageType.PROPOSITIONAC);
 		this.contextAgent = contextAgent;
 		this.action = action;
 		this.serviceAgentMessage = serviceAgentMessage;
+		this.confidence = contextAgent.getConfidence();
 	}
 
 	public ContextAgent getContextAgent() {
@@ -33,6 +35,9 @@ public class ContextAgentProposition {
 		return serviceAgentMessage;
 	}
 	
+	public double getConfidence(){
+		return confidence;
+	}
 
 	
 }

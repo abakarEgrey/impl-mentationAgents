@@ -2,8 +2,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class ServiceAgentMessage {
-
+public class ServiceAgentMessage extends AbstractMessage {
+	
 	private int cardinality;
 	private String senderType;
 	private Action messageType;
@@ -25,7 +25,7 @@ public class ServiceAgentMessage {
 	public ServiceAgentMessage(int cardinality, String senderType,
 			Action messageType, Pair<Boolean, List<Agent>> serviceAgentState,
 			int nbOfConnection, Double averageTOConnexion, ServiceAgent serviceAgent) {
-		super();
+		super(MessageType.SAMESSAGE);
 		this.cardinality = cardinality;
 		this.senderType = senderType;
 		this.messageType = messageType;
@@ -47,7 +47,7 @@ public class ServiceAgentMessage {
 	 */
 	public ServiceAgentMessage(String senderType, Action messageType,
 			Pair<Boolean, List<Agent>> serviceAgentState) {
-		super();
+		super(MessageType.SAMESSAGE);
 		this.senderType = senderType;
 		this.messageType = messageType;
 		this.serviceAgentState = serviceAgentState;

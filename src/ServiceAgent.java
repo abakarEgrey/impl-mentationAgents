@@ -1,11 +1,11 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
+
 
 import fr.irit.smac.libs.tooling.messaging.AgentMessaging;
 import fr.irit.smac.libs.tooling.messaging.IMsgBox;
+import fr.irit.smac.libs.tooling.messaging.impl.Ref;
 
 public class ServiceAgent extends Agent {
 	// Properties
@@ -15,6 +15,8 @@ public class ServiceAgent extends Agent {
 
 	// TODO messages from other services agents and from
 	private ArrayList<ContextAgent> contextAgents;
+	private int countIdContextAgents;
+	
 	private InstanceAgent instanceAgent;
 	private Map<String, Pair<Integer, Double>> nbConnectEtTempMoy;
 //	private Queue<MessageAgent> messagesBox;
@@ -24,7 +26,7 @@ public class ServiceAgent extends Agent {
 	private ServiceAgentMessage lastMessage; //TODO ?????????????
 	//private Map<String, Action> contextAgentPropositions;
 	
-	
+
 	// liste contenant les propositions des agents contextes
 	private ArrayList<ContextAgentProposition> contextPropositions;
 	Map<ServiceAgentMessage, ArrayList<Pair<ContextAgent, Action>>> listProp;
@@ -33,7 +35,7 @@ public class ServiceAgent extends Agent {
 	//private String id; already in agent
 	
 	private IMsgBox<AbstractMessage> messageBox;
-	private SAMsgBoxHistoryAgent msgBoxHAgent;
+	private SAMsgBoxHistoryAgent msgBoxHAgent; 
 	
 	// private HashMap<Agent, Pair<Boolean, ArrayList<Agent>>> etatsVoisins;
 	// Constructor ServiceAgent
@@ -55,6 +57,22 @@ public class ServiceAgent extends Agent {
 	
 	// Acessors
 	
+	
+	public int getCountIdContextAgents() {
+		return countIdContextAgents;
+	}
+
+
+	public IMsgBox<AbstractMessage> getMessageBox() {
+		return messageBox;
+	}
+
+
+	public void setCountIdContextAgents(int countIdContextAgents) {
+		this.countIdContextAgents = countIdContextAgents;
+	}
+
+	
 	// Life Cycle
 	@Override
 	protected void perceive() {
@@ -64,6 +82,9 @@ public class ServiceAgent extends Agent {
 		//on peut ajouter une methode getEnvironmentProperties pour recuperer les caractéristiques de l'environnement
 		//envoyer les messages des agents services aux agents contextes
 		//les agents contextes accèdent directement à la boite de reception de l'agent service.
+		 
+		 
+		 
 		
 	}
 	/**
@@ -194,4 +215,20 @@ public class ServiceAgent extends Agent {
 		//TODO : check instance and change the list to List(same instance, Service agent)
 	}
 
+
+
+	public ArrayList<AbstractMessage> getMessages() {
+		return new ArrayList<AbstractMessage> (messageBox.getMsgs());
+	}
+
+	public ArrayList<ServiceAgentMessage> getServiceMessages(){
+		return msgBoxHAgent.getSaMessages();
+	}
+
+
+	public  Ref<AbstractMessage> getRefBox() {
+		return messageBox.getRef();
+	}
+
 }
+

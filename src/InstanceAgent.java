@@ -7,19 +7,27 @@ public class InstanceAgent extends Agent {
 	// Properties
 	// id
 	private ArrayList<ServiceAgent> serviceAgents;
-
+	private int countIdContextAgents;
+	
 	// Constructor
-	public InstanceAgent() {
-
+	public InstanceAgent(String id) {
+		this.id = id;
 	}
 
+	
+	
 	// Accessor
-	// @Override
-	// protected Agent getParent ()
-	// {
-	// //TODO use an error
-	// return null;
-	// }
+
+	
+	public int getCountIdContextAgents() {
+		return countIdContextAgents;
+	}
+
+
+
+	public void setCountIdContextAgents(int countIdContextAgents) {
+		this.countIdContextAgents = countIdContextAgents;
+	}
 
 	// Life Cycle
 	@Override
@@ -57,6 +65,7 @@ public class InstanceAgent extends Agent {
 		return childrenConnexion;
 	}
 
+	//TODO: to change...Or had a more efficient: we DON'T care about the bool, mb
 	public ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> getActualNeighboursState(ServiceAgent askingServiceAgent) {
 		
 		//List containing the state of the neighbours of serviceAgentAsking
@@ -67,6 +76,7 @@ public class InstanceAgent extends Agent {
 		Pair<Boolean, ArrayList<ServiceAgent>> servACState;
 		
 		//Asking Service Agent State to avoid multiple queries
+		
 		Pair<Boolean, ArrayList<ServiceAgent>> askingServiceAgentState = askingServiceAgent.getCurrentServiceState();
 		
 		for (int i = 0; i < serviceAgents.size(); i++) {
@@ -116,4 +126,7 @@ public class InstanceAgent extends Agent {
 		return actualNeighboursState;
 	}
 
+
+
+	
 }

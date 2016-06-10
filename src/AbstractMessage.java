@@ -1,6 +1,7 @@
 
 public class AbstractMessage {
 	
+	//This type is not really obligatory, it is more for readability than real cast 
 	private MessageType type;
 	
 	public AbstractMessage (MessageType type)
