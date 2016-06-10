@@ -12,6 +12,8 @@ public class ServiceAgentMessage extends AbstractMessage {
 	private Double averageTOConnexion;
 	//l'agent service qui envoie le message
 	private ServiceAgent serviceAgent;
+	//Variable permettant de compter le nombre de liaison de l'agent service
+	private int nbLink;
 	
 	/**
 	 * 
@@ -33,6 +35,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 		this.nbOfConnection = nbOfConnection;
 		this.averageTOConnexion = averageTOConnexion;
 		this.serviceAgent = serviceAgent;
+		this.nbLink = 0;     
 	}
 
 	public ServiceAgent getServiceAgent() {

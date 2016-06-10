@@ -23,6 +23,7 @@ public class ServiceAgent extends Agent {
 	// action choisie et le dernier message de l'agent service sont mis à jour
 	// par la methode decider
 	private Action choosenAction;
+	
 	private ServiceAgentMessage lastMessage; //TODO ?????????????
 	//private Map<String, Action> contextAgentPropositions;
 	
@@ -38,6 +39,7 @@ public class ServiceAgent extends Agent {
 	private SAMsgBoxHistoryAgent msgBoxHAgent; 
 	
 	// private HashMap<Agent, Pair<Boolean, ArrayList<Agent>>> etatsVoisins;
+
 	// Constructor ServiceAgent
 	public ServiceAgent(String id, InstanceAgent parent) {
 		this.id = id;
@@ -47,11 +49,12 @@ public class ServiceAgent extends Agent {
 //		this.messagesBox = new PriorityQueue<MessageAgent>();
 		choosenAction = null;
 		lastMessage = null;
-		//this.contextAgentPropositions = new HashMap<String, Action>();
+		// this.contextAgentPropositions = new HashMap<String, Action>();
 		this.contextPropositions = new ArrayList<ContextAgentProposition>();
 		listProp = new HashMap<ServiceAgentMessage, ArrayList<Pair<ContextAgent,Action>>>();
 		messageBox = (IMsgBox<AbstractMessage>) AgentMessaging.getMsgBox(id, AbstractMessage.class);
 		msgBoxHAgent = new SAMsgBoxHistoryAgent(this);
+
 	}
 
 	
@@ -77,21 +80,24 @@ public class ServiceAgent extends Agent {
 	@Override
 	protected void perceive() {
 		// TODO Auto-generated method stub
-		// traiter la liste des propositions des agents contextes selon le type de message au cycle precedent
-		 this.listProp = treatPrositionsList();
-		//on peut ajouter une methode getEnvironmentProperties pour recuperer les caractéristiques de l'environnement
-		//envoyer les messages des agents services aux agents contextes
-		//les agents contextes accèdent directement à la boite de reception de l'agent service.
-		 
-		 
-		 
-		
+		// traiter la liste des propositions des agents contextes selon le type
+		// de message au cycle precedent
+		this.listProp = treatPrositionsList();
+		// on peut ajouter une methode getEnvironmentProperties pour recuperer
+		// les caractéristiques de l'environnement
+		// envoyer les messages des agents services aux agents contextes
+		// les agents contextes accèdent directement à la boite de reception de
+		// l'agent service.
 	}
+
 	/**
 	 * Cette méthode permet de traiter les messages
+	 * 
 	 * @return
 	 */
+
 	private Map<ServiceAgentMessage, ArrayList<Pair<ContextAgent, Action>>> treatPrositionsList() {
+
 		// TODO Auto-generated method stub
 		Map<ServiceAgentMessage, ArrayList<Pair<ContextAgent, Action>>> propositionsList = new HashMap<ServiceAgentMessage, ArrayList<Pair<ContextAgent, Action>>>();
 		// trier les propositions
@@ -119,8 +125,26 @@ public class ServiceAgent extends Agent {
 		// TODO Auto-generated method stub
 		// update attribute choosenAction and last message.
 		// ...
+
+		// recuperer la liste des messages
+		Set<ServiceAgentMessage> listMessage = this.listProp.keySet();
+		for (ServiceAgentMessage m : listMessage) {
+			if (!this.listProp.get(m).isEmpty()) {
+				Action action = chooseBestAction();
+				this.listAction.add(action);
+			} else {
+				
+			}
+		}
+		this.creerFils();
+
 		
 		//this.creerFils();
+	}
+
+	private Action chooseBestAction() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
