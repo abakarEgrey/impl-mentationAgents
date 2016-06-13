@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class AbstractMessage {
+public abstract class AbstractMessage {
 
 	// This type is not really obligatory, it is more for readability than real
 	// cast

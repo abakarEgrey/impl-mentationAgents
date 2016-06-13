@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.irit.smac.libs.tooling.messaging.impl.Ref;
+
 
 public class ServiceAgentMessage extends AbstractMessage {
 	
@@ -14,6 +16,8 @@ public class ServiceAgentMessage extends AbstractMessage {
 	private ServiceAgent serviceAgent;
 	//Variable permettant de compter le nombre de liaison de l'agent service
 	private int nbLink;
+	private Ref<AbstractMessage> refServiceAgent;
+	
 	
 	/**
 	 * 
@@ -35,7 +39,8 @@ public class ServiceAgentMessage extends AbstractMessage {
 		this.nbOfConnection = nbOfConnection;
 		this.averageTOConnexion = averageTOConnexion;
 		this.serviceAgent = serviceAgent;
-		this.nbLink = 0;     
+		this.nbLink = 0;  
+		this.refServiceAgent =  serviceAgent.getMessageBox().getRef();
 	}
 
 	public ServiceAgent getServiceAgent() {

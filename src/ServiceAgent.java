@@ -138,7 +138,7 @@ public class ServiceAgent extends Agent {
 				ArrayList<ContextAgentProposition> subPropList = this.listProp.get(m);
 				if (!subPropList.isEmpty()) {
 					//contexAgentBestConfidence.add(eliminateContradictoryActionsAndFeedbackThem(subPropList));
-					eliminateContradictoryActionsAndFeedbackThem(subPropList);
+					eliminateContradictoryActionsAndFeedbackThem(subPropList); //TODO : create list that will be feedback at the act part
 					//sortALofCandAWithConfidence(subPropList);
 					// Sublist with only "best actions" for each message i.e.
 					// the action type with the best confidence in the set
@@ -150,6 +150,9 @@ public class ServiceAgent extends Agent {
 
 			// Decision of action performed
 			choosenActions = getOrderedListOfBestActions();
+			
+			//TODO: choose the limited number of action performed, now it's only one action
+			//TODO: positive feedback? yes?
 
 		} else {
 			// TODO: when no proposition
