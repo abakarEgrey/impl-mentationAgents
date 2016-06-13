@@ -118,7 +118,12 @@ public class ContextAgent extends Agent {
 
 	// Accessors and mutators
 
-	public double getConfidence() {
+	public Double getConfidenceD() {
+		//Implemented for comparable need
+		return new Double(confidence);
+	}
+	
+	public double getConfidence(){
 		return confidence;
 	}
 

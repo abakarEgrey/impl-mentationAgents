@@ -54,34 +54,10 @@ public class SAMsgBoxHistoryAgent extends Agent {
 	@Override
 	protected void act() {
 		ArrayList<AbstractMessage> abstractMessages = myServiceAgent.getMessages();
-		propositionsAC.clear();
-		saMessages.clear();
-		for (AbstractMessage abstMessage : abstractMessages) {
-			if(abstMessage.getType() == MessageType.PROPOSITIONAC){
-				 if (abstMessage instanceof ContextAgentProposition){
-					 propositionsAC.add((ContextAgentProposition)abstMessage); 
-				 }
-				 else{
-					 //TODO : error
-					 //Note, the enum was at first here for readability, may be erased
-				 }
-			 }
-			 else if(abstMessage.getType() == MessageType.SAMESSAGE){
-				 if (abstMessage instanceof ServiceAgentMessage){
-					 saMessages.add((ServiceAgentMessage)abstMessage);
-				 }
-				 else{
-					 //TODO : error
-					 //Note, the enum was at first here for readability, may be erased
-				 }
-			 }
-			 else {
-				 //TODO error
-			 }
-			
-        }
+		Pair<ArrayList<ContextAgentProposition>, ArrayList<ServiceAgentMessage>> sortedMessages =  AbstractMessage.sortAbstractMIntoCAPandSAM(abstractMessages);;
 		
-				
+		propositionsAC = sortedMessages.getFirst();
+		saMessages = sortedMessages.getSecond();
 		
 	}
 
@@ -90,6 +66,11 @@ public class SAMsgBoxHistoryAgent extends Agent {
 		// TODO Auto-generated method stub
 		 
 	}
+	
+	public void changePorpositionList(ArrayList<ContextAgentProposition> newArray){
+		this.propositionsAC = newArray;
+	}
+
 
 	
 	

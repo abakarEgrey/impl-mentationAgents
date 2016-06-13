@@ -39,5 +39,10 @@ public class ContextAgentProposition extends AbstractMessage{
 		return confidence;
 	}
 
+	public Double getConfidenceD() {
+		// TODO Auto-generated method stub
+		return new Double(confidence);
+	}
+
 	
 }
