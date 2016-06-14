@@ -3,12 +3,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-public class InstanceAgent extends Agent {
+public class InstanceAgent<T> extends Agent {
 	// Properties
 	// id
 	private ArrayList<ServiceAgent> serviceAgents;
 	private int countIdContextAgents;
-	
+	//T is the of the component
+	private T type;
 	// Constructor
 	public InstanceAgent(String id) {
 		this.id = id;
@@ -21,6 +22,12 @@ public class InstanceAgent extends Agent {
 	
 	public int getCountIdContextAgents() {
 		return countIdContextAgents;
+	}
+
+
+
+	public T getType() {
+		return type;
 	}
 
 

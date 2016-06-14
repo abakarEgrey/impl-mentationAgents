@@ -43,6 +43,7 @@ public class ContextAgent extends Agent {
 	private ArrayList<ServiceAgentMessage> listValidatingSAMessage;
 	private IMsgBox<AbstractMessage> messageBox;
 	private Ref<AbstractMessage> refAgentService;
+	private int feedBack;
 
 	// Constructor
 	// public ContextAgent(String senderType, Action messageType,
@@ -78,6 +79,7 @@ public class ContextAgent extends Agent {
 		this.confidence = confidence;
 		this.messageBox = (IMsgBox<AbstractMessage>) AgentMessaging.getMsgBox(id, AbstractMessage.class);
 		this.refAgentService =  serviceAgent.getMessageBox().getRef();
+		this.feedBack = 0;
 		// this.ArrayListServiceAgentMessage = new
 		// ArrayList<ServiceAgentMessage>();
 		// ??
@@ -118,11 +120,20 @@ public class ContextAgent extends Agent {
 
 	// Accessors and mutators
 
+	
 	public Double getConfidenceD() {
 		//Implemented for comparable need
 		return new Double(confidence);
 	}
 	
+	public int getFeedBack() {
+		return feedBack;
+	}
+
+	public void setFeedBack(int feedBack) {
+		this.feedBack = feedBack;
+	}
+
 	public double getConfidence(){
 		return confidence;
 	}
@@ -187,7 +198,12 @@ public class ContextAgent extends Agent {
 		this.isValid = isValid;
 	}
 
+	
 	// Life cycle
+
+	public Ref<AbstractMessage> getRefAgentService() {
+		return refAgentService;
+	}
 
 	@Override
 	protected void perceive() {

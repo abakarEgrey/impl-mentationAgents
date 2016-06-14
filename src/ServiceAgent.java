@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,6 +14,8 @@ import fr.irit.smac.libs.tooling.messaging.impl.Ref;
 public class ServiceAgent extends Agent {
 	// Properties
 	private static final double RECOMPENSE = 0.5;
+	private static final double defaultAverageTime = 0;
+	private static final int defaultNbOfConnection = 0;
 	private Pair<Boolean, ArrayList<ServiceAgent>> isConnected;
 
 	//
@@ -19,11 +23,12 @@ public class ServiceAgent extends Agent {
 	private int countIdContextAgents;
 
 	private InstanceAgent instanceAgent;
-	private Map<String, Pair<Integer, Double>> nbConnectEtTempMoy;
+	private Map<String, Pair<Integer, Double>> nbOfConnectionAndAverageTime;
 	// private Queue<MessageAgent> messagesBox;
 	// action choisie et le dernier message de l'agent service sont mis à jour
 	// par la methode decider
 	private ArrayList<ArrayList<ContextAgentProposition>> choosenActions;
+	private int cardinality;
 
 	private ServiceAgentMessage lastMessage; // TODO ?????????????
 	// private Map<String, Action> contextAgentPropositions;
@@ -39,6 +44,19 @@ public class ServiceAgent extends Agent {
 
 	private IMsgBox<AbstractMessage> messageBox;
 	private SAMsgBoxHistoryAgent msgBoxHAgent;
+	// Attribute contains context agents have proposed action (first) and agent
+	// context don't have proposed (second)
+	// private Map<ServiceAgentMessage,
+	// Pair<ArrayList<ContextAgentProposition>,ArrayList<ContextAgentProposition>>>
+	// listPropSorted;
+	// The default list contains all messages with the proposition of contexts
+	// agents
+	private ArrayList<ArrayList<ContextAgentProposition>> listContextAgentNonSelected;
+	// Attribute contains a list of messages don't have a context agent
+	// proposition
+	private ArrayList<ServiceAgentMessage> listOfSAMNoProposition;
+	// Attribute contains a list of all actions possibles
+	private Set<Action> setOfAllActions;
 
 	// private HashMap<Agent, Pair<Boolean, ArrayList<Agent>>> etatsVoisins;
 
@@ -47,15 +65,40 @@ public class ServiceAgent extends Agent {
 		this.id = id;
 		this.instanceAgent = parent;
 		this.contextAgents = new ArrayList<ContextAgent>();
-		this.nbConnectEtTempMoy = new HashMap<String, Pair<Integer, Double>>();
+		this.nbOfConnectionAndAverageTime = new HashMap<String, Pair<Integer, Double>>();
 		// this.messagesBox = new PriorityQueue<MessageAgent>();
 		choosenActions = null;
 		lastMessage = null;
 		// this.contextAgentPropositions = new HashMap<String, Action>();
 		this.contextPropositions = new ArrayList<ContextAgentProposition>();
 		listProp = new HashMap<ServiceAgentMessage, ArrayList<ContextAgentProposition>>();
-		messageBox = (IMsgBox<AbstractMessage>) AgentMessaging.getMsgBox(id, AbstractMessage.class);
+		messageBox = (IMsgBox<AbstractMessage>) AgentMessaging.getMsgBox(id,
+				AbstractMessage.class);
 		msgBoxHAgent = new SAMsgBoxHistoryAgent(this);
+		// this.listPropSorted = new HashMap<ServiceAgentMessage,
+		// Pair<ArrayList<ContextAgentProposition>,ArrayList<ContextAgentProposition>>>();
+		this.listContextAgentNonSelected = new ArrayList<ArrayList<ContextAgentProposition>>();
+		this.listOfSAMNoProposition = new ArrayList<ServiceAgentMessage>();
+		this.setOfAllActions = new HashSet<Action>();
+
+	}
+
+	// Constructor ServiceAgent
+	public ServiceAgent(String id, InstanceAgent parent, int cardinality) {
+		this.id = id;
+		this.instanceAgent = parent;
+		this.contextAgents = new ArrayList<ContextAgent>();
+		this.nbOfConnectionAndAverageTime = new HashMap<String, Pair<Integer, Double>>();
+		// this.messagesBox = new PriorityQueue<MessageAgent>();
+		choosenActions = null;
+		lastMessage = null;
+		// this.contextAgentPropositions = new HashMap<String, Action>();
+		this.contextPropositions = new ArrayList<ContextAgentProposition>();
+		listProp = new HashMap<ServiceAgentMessage, ArrayList<ContextAgentProposition>>();
+		messageBox = (IMsgBox<AbstractMessage>) AgentMessaging.getMsgBox(id,
+				AbstractMessage.class);
+		msgBoxHAgent = new SAMsgBoxHistoryAgent(this);
+		this.cardinality = cardinality;
 
 	}
 
@@ -77,7 +120,8 @@ public class ServiceAgent extends Agent {
 	@Override
 	protected void perceive() {
 
-		ArrayList<AbstractMessage> mReceived = new ArrayList<AbstractMessage>(messageBox.getMsgs());
+		ArrayList<AbstractMessage> mReceived = new ArrayList<AbstractMessage>(
+				messageBox.getMsgs());
 		Pair<ArrayList<ContextAgentProposition>, ArrayList<ServiceAgentMessage>> sortedMessages = AbstractMessage
 				.sortAbstractMIntoCAPandSAM(mReceived);
 		contextPropositions = sortedMessages.getFirst();
@@ -88,6 +132,14 @@ public class ServiceAgent extends Agent {
 		// traiter la liste des propositions des agents contextes selon le type
 		// de message au cycle precedent
 		this.listProp = sortPrositionsList();
+		// add the SAM which have not a proposition to the
+		// listOfSAMNoProposition list
+		for (ServiceAgentMessage sAM : this.serviceAgentMessages) {
+			if (!this.listProp.containsKey(sAM)) {
+				this.listOfSAMNoProposition.add(sAM);
+			}
+		}
+		// this.listContextAgentNonSelected = this.listProp;
 		// on peut ajouter une methode getEnvironmentProperties pour recuperer
 		// les caractéristiques de l'environnement
 		// envoyer les messages des agents services aux agents contextes
@@ -108,7 +160,8 @@ public class ServiceAgent extends Agent {
 		for (ContextAgentProposition c : this.contextPropositions) {
 			ServiceAgentMessage message = c.getServiceAgentMessage();
 			if (propositionsList.containsKey(message)) {
-				ArrayList<ContextAgentProposition> listContextAgentProposition = propositionsList.get(message);
+				ArrayList<ContextAgentProposition> listContextAgentProposition = propositionsList
+						.get(message);
 				// ajouter la proposition de l'agent contexte à la liste des
 				// agents contextes qui sont pour le message "message"
 				listContextAgentProposition.add(c);
@@ -124,22 +177,38 @@ public class ServiceAgent extends Agent {
 
 	@Override
 	protected void decide() {
+		// clear choosen actions matrix
+		this.choosenActions.clear();
 
 		// recuperer la liste des messages
 		if (!listProp.isEmpty()) {
 
 			Set<ServiceAgentMessage> listMessage = this.listProp.keySet();
-			//ArrayList<ContextAgentProposition> contexAgentBestConfidence = new ArrayList<Pair<ContextAgent, Action>>();
+			// ArrayList<ContextAgentProposition> contexAgentBestConfidence =
+			// new ArrayList<Pair<ContextAgent, Action>>();
 
 			// Eliminate contradictories actions like nerienfaire and repondre:
 			// have only one possible action for a SA message
 			// Save the best confidence for decision
 			for (ServiceAgentMessage m : listMessage) {
-				ArrayList<ContextAgentProposition> subPropList = this.listProp.get(m);
+				ArrayList<ContextAgentProposition> subPropList = this.listProp
+						.get(m);
 				if (!subPropList.isEmpty()) {
-					//contexAgentBestConfidence.add(eliminateContradictoryActionsAndFeedbackThem(subPropList));
-					eliminateContradictoryActionsAndFeedbackThem(subPropList); //TODO : create list that will be feedback at the act part
-					//sortALofCandAWithConfidence(subPropList);
+					// contexAgentBestConfidence.add(eliminateContradictoryActionsAndFeedbackThem(subPropList));
+					subPropList = eliminateContradictoryActionsAndFeedbackThem(
+							subPropList, m); // TODO
+												// :
+												// create
+												// list
+												// that
+												// will
+												// be
+												// feedback
+												// at
+												// the
+												// act
+												// part
+					// sortALofCandAWithConfidence(subPropList);
 					// Sublist with only "best actions" for each message i.e.
 					// the action type with the best confidence in the set
 					listProp.put(m, subPropList);
@@ -150,74 +219,148 @@ public class ServiceAgent extends Agent {
 
 			// Decision of action performed
 			choosenActions = getOrderedListOfBestActions();
-			
-			//TODO: choose the limited number of action performed, now it's only one action
-			//TODO: positive feedback? yes?
+
+			// TODO: choose the limited number of action performed, now it's
+			// only one action
+			// TODO: positive feedback? yes?
 
 		} else {
 			// TODO: when no proposition
+			decideOnlyForChoiceAction();
+
 		}
 
 		// this.creerFils();
 	}
-	
+
+	private void decideOnlyForChoiceAction() {
+		// TODO Auto-generated method stub
+		// if no action is executed then create a new context agent assaciated
+		// with the action choosed
+		if (!this.listOfSAMNoProposition.isEmpty()) {
+			for (ServiceAgentMessage sAM : this.listOfSAMNoProposition) {
+				// get action
+				Action action = sAM.getMessageType();
+				switch (action) {
+				case ANNONCER:
+					// if the service agent isn't connected
+					if (!this.isConnected.getFirst()) {
+						// view the set of action. if this set contains the
+						// action REPONDRE then create a new context agent and
+						// send negative feedback to the context agent with the
+						// action REPONDRE or ask to delete itself
+						if (!this.setOfAllActions.contains(Action.REPONDRE)) {
+							createContextAgent(Action.REPONDRE);
+							this.setOfAllActions.add(Action.REPONDRE);
+						} else {
+							// it is a problem with the context agent which not
+							// propose his action. send a negative feedback. (For example, when the SA is connected but after some time, SA is deconnected)
+						}
+					} else {
+						//if the service agent is connected
+						
+					}
+					break;
+				}
+				/*if (this.setOfAllActions.contains(action)) {
+					// There is a context agent created with this action. If no
+					// context agent is associated with action in the set then
+					// remove this action from the set. Some context agents
+					// exist but not valid
+
+					createContextAgent(action);
+
+				} else {
+					createContextAgent(action);
+					this.setOfAllActions.add(action);
+				}*/
+			}
+		} else {
+			// No context agents propositions and no messages received from
+			// others. So view the state of Service agent
+		}
+	}
+
+	private void createContextAgent(Action action) {
+		// TODO Auto-generated method stub
+
+	}
+
 	private static Comparator<ContextAgentProposition> myComparatorOfConfidenceInSubList = new Comparator<ContextAgentProposition>() {
 		@Override
-		public int compare(ContextAgentProposition cap1, ContextAgentProposition cap2) {
+		public int compare(ContextAgentProposition cap1,
+				ContextAgentProposition cap2) {
 			return cap1.getConfidenceD().compareTo(cap2.getConfidenceD());
 		}
 	};
-	
+
 	private static Comparator<ArrayList<ContextAgentProposition>> myComparatorOfConfidenceList = new Comparator<ArrayList<ContextAgentProposition>>() {
 		@Override
-		public int compare(ArrayList<ContextAgentProposition> acap1, ArrayList<ContextAgentProposition> acap2) {
-			return acap1.get(acap1.size()-1).getConfidenceD().compareTo(acap2.get(acap2.size()-1).getConfidenceD());
+		public int compare(ArrayList<ContextAgentProposition> acap1,
+				ArrayList<ContextAgentProposition> acap2) {
+			return acap1.get(acap1.size() - 1).getConfidenceD()
+					.compareTo(acap2.get(acap2.size() - 1).getConfidenceD());
 		}
 	};
 
-
 	private ArrayList<ArrayList<ContextAgentProposition>> getOrderedListOfBestActions() {
-		ArrayList<ArrayList<ContextAgentProposition>> actionsSortedByMessage = new ArrayList<ArrayList<ContextAgentProposition>>(listProp.values());
-		//ArrayList<ContextAgentProposition> actionConfidenceForM = new ArrayList<ContextAgentProposition>();
-		
-		//TODO: Check that each list is not empty
-		
-		//Sort sub list in order to have the best confidence (at the end of the sub list)
-		for (ArrayList<ContextAgentProposition> aListCAP :  actionsSortedByMessage){
-			Collections.sort(aListCAP , myComparatorOfConfidenceInSubList);
-		}
-		
-		//Sort list (of sub list) with an ascending order (the sub list with the best confidence is at the end)
-		Collections.sort(actionsSortedByMessage , myComparatorOfConfidenceList);
-		
-//		//Create an array containing 
-//		for (ArrayList<ContextAgentProposition> aListCAP :  actionsSortedByMessage){
-//			actionConfidenceForM.add(aListCAP.get(aListCAP.size()-1));
-//		}
+		ArrayList<ArrayList<ContextAgentProposition>> actionsSortedByMessage = new ArrayList<ArrayList<ContextAgentProposition>>(
+				listProp.values());
+		// ArrayList<ContextAgentProposition> actionConfidenceForM = new
+		// ArrayList<ContextAgentProposition>();
 
-//		Collections.reverse(actionConfidenceForM);
-		
-//		return actionConfidenceForM;
-		
+		// TODO: Check that each list is not empty
+
+		// Sort sub list in order to have the best confidence (at the end of the
+		// sub list)
+		for (ArrayList<ContextAgentProposition> aListCAP : actionsSortedByMessage) {
+			Collections.sort(aListCAP, myComparatorOfConfidenceInSubList);
+		}
+
+		// Sort list (of sub list) with an ascending order (the sub list with
+		// the best confidence is at the end)
+		Collections.sort(actionsSortedByMessage, myComparatorOfConfidenceList);
+
+		// //Create an array containing
+		// for (ArrayList<ContextAgentProposition> aListCAP :
+		// actionsSortedByMessage){
+		// actionConfidenceForM.add(aListCAP.get(aListCAP.size()-1));
+		// }
+
+		// Collections.reverse(actionConfidenceForM);
+
+		// return actionConfidenceForM;
+
 		Collections.reverse(actionsSortedByMessage);
 		return actionsSortedByMessage;
 	}
 
-	private ContextAgentProposition eliminateContradictoryActionsAndFeedbackThem(
-			ArrayList<ContextAgentProposition> subPropList) {
-		ContextAgentProposition contextAgentBestConfidence = new ContextAgentProposition(null, null, null);
+	private ArrayList<ContextAgentProposition> eliminateContradictoryActionsAndFeedbackThem(
+			ArrayList<ContextAgentProposition> subPropList,
+			ServiceAgentMessage m) {
+
+		List<ContextAgentProposition> listOfNonSelectedAC = new ArrayList<ContextAgentProposition>();
+		List<ContextAgentProposition> subPropListTmp = subPropList;
+		// Array list contains the removed elements
+		ArrayList<ContextAgentProposition> listOfRemovedAC = new ArrayList<ContextAgentProposition>();
+		ContextAgentProposition contextAgentBestConfidence = null;
 		if (subPropList.isEmpty()) {
-			contextAgentBestConfidence = subPropList.get(subPropList.size() - 1);
+			contextAgentBestConfidence = subPropList
+					.get(subPropList.size() - 1);
 			for (ContextAgentProposition cAP : subPropList) {
-				if (cAP.getConfidence() > contextAgentBestConfidence.getConfidence()) {
+				if (cAP.getConfidence() > contextAgentBestConfidence
+						.getConfidence()) {
 					contextAgentBestConfidence = cAP;
 				}
 			}
 			// for (Pair<ContextAgent, Action> pCA : subPropList){
-			for (int i = subPropList.size() - 1; i >= 0; i--) {
-				if (subPropList.get(i).getAction().equals(contextAgentBestConfidence.getAction())) {
+			for (int i = subPropListTmp.size() - 1; i >= 0; i--) {
+				if (subPropListTmp.get(i).getAction()
+						.equals(contextAgentBestConfidence.getAction())) {
 					// TODO: positive feedback?: no ?
 				} else {
+					listOfNonSelectedAC.add(subPropList.get(i));
+					listOfRemovedAC.add(subPropList.get(i));
 					subPropList.remove(i);
 					// TODO: negative feedback
 				}
@@ -226,16 +369,21 @@ public class ServiceAgent extends Agent {
 
 			// TODO:Error
 		}
-		return contextAgentBestConfidence;
+		this.listContextAgentNonSelected.add(listOfRemovedAC);
+		return subPropList;
 	}
 
-	private void sortALofCandAWithConfidence(ArrayList<ContextAgentProposition> subPropList) {
-		Collections.sort(subPropList, new Comparator<ContextAgentProposition>() {
-			@Override
-			public int compare(ContextAgentProposition cap1, ContextAgentProposition cap2) {
-				return cap1.getConfidenceD().compareTo(cap2.getConfidenceD());
-			}
-		});
+	private void sortALofCandAWithConfidence(
+			ArrayList<ContextAgentProposition> subPropList) {
+		Collections.sort(subPropList,
+				new Comparator<ContextAgentProposition>() {
+					@Override
+					public int compare(ContextAgentProposition cap1,
+							ContextAgentProposition cap2) {
+						return cap1.getConfidenceD().compareTo(
+								cap2.getConfidenceD());
+					}
+				});
 	}
 
 	private Action chooseBestAction() {
@@ -246,7 +394,95 @@ public class ServiceAgent extends Agent {
 	@Override
 	protected void act() {
 		// TODO Auto-generated method stub
+		if (!this.choosenActions.isEmpty()) {
+			for (ArrayList<ContextAgentProposition> cAA : this.choosenActions) {
+				// get list of context agents propositions answered for a
+				// message
+				// ArrayList<ContextAgentProposition> contextAgentAnswered =
+				// this.choosenActions.
 
+				if (!cAA.isEmpty()) {
+					// get action to be executed by service agent
+					Action actionToBeExecute = cAA.get(0).getAction();
+					ServiceAgentMessage sAM = null;
+					Pair<Integer, Double> connAndTime = this.nbOfConnectionAndAverageTime
+							.get(this.id);
+					int nbOfConnection = connAndTime.getFirst();
+					double averageTOConnexion = connAndTime.getSecond();
+					switch (actionToBeExecute) {
+					case ANNONCER:
+						// construct the message to be sended
+						sAM = new ServiceAgentMessage(this.cardinality, null,
+								actionToBeExecute, this.isConnected,
+								ServiceAgent.defaultNbOfConnection,
+								ServiceAgent.defaultAverageTime, this);
+						// Execute action. Here send the message to Instance
+						// Agent
+						break;
+					case REPONDRE:
+						// build the reponse message to be sended
+						sAM = new ServiceAgentMessage(this.cardinality,
+								this.instanceAgent.getType().toString(),
+								actionToBeExecute, this.isConnected,
+								nbOfConnection, averageTOConnexion, this);
+
+						break;
+					case SECONNECTER:
+						// build the connection message to be sended
+						sAM = new ServiceAgentMessage(this.cardinality,
+								this.instanceAgent.getType().toString(),
+								actionToBeExecute, this.isConnected,
+								nbOfConnection, averageTOConnexion, this);
+
+						break;
+					case SEDECONNECTER:
+						sAM = new ServiceAgentMessage(this.cardinality,
+								this.instanceAgent.getType().toString(),
+								actionToBeExecute, this.isConnected,
+								nbOfConnection, averageTOConnexion, this);
+
+						break;
+					case NERIENFAIRE:
+						sAM = new ServiceAgentMessage(this.cardinality,
+								this.instanceAgent.getType().toString(),
+								actionToBeExecute, this.isConnected,
+								nbOfConnection, averageTOConnexion, this);
+						// or not send message to the service agent
+						break;
+					default:
+						break;
+
+					}
+					this.messageBox.send(sAM, cAA.get(0)
+							.getServiceAgentMessage().getRefServiceAgent());
+
+					// give feedbacks for agents contexts
+					for (ContextAgentProposition cAP : cAA) {
+						cAP.getContextAgent().setFeedBack(1);
+
+					}
+
+				}
+
+			}
+			// to optimize the feedback of context where their actions
+			// are not good
+			if (!this.listContextAgentNonSelected.isEmpty()) {
+				for (ArrayList<ContextAgentProposition> listCAP : this.listContextAgentNonSelected) {
+					sendFeedBack(listCAP);
+				}
+			}
+
+		}
+
+	}
+
+	private void sendFeedBack(ArrayList<ContextAgentProposition> listCAP) {
+		if (!listCAP.isEmpty()) {
+			for (ContextAgentProposition cAP : listCAP) {
+				cAP.getContextAgent().setFeedBack(0);
+			}
+		}
 	}
 
 	@Override

@@ -9,7 +9,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 	private int cardinality;
 	private String senderType;
 	private Action messageType;
-	private Pair<Boolean, List<Agent>> serviceAgentState;
+	private Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState;
 	private int nbOfConnection;
 	private Double averageTOConnexion;
 	//l'agent service qui envoie le message
@@ -29,7 +29,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 	 * @param averageTOConnexion
 	 */
 	public ServiceAgentMessage(int cardinality, String senderType,
-			Action messageType, Pair<Boolean, List<Agent>> serviceAgentState,
+			Action messageType, Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState,
 			int nbOfConnection, Double averageTOConnexion, ServiceAgent serviceAgent) {
 		super(MessageType.SAMESSAGE);
 		this.cardinality = cardinality;
@@ -54,7 +54,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 	 * @param serviceAgentState
 	 */
 	public ServiceAgentMessage(String senderType, Action messageType,
-			Pair<Boolean, List<Agent>> serviceAgentState) {
+			 Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState) {
 		super(MessageType.SAMESSAGE);
 		this.senderType = senderType;
 		this.messageType = messageType;
@@ -86,7 +86,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 	 * 
 	 * @return
 	 */
-	public Pair<Boolean, List<Agent>> getServiceAgentState() {
+	public  Pair<Boolean, ArrayList<ServiceAgent>> getServiceAgentState() {
 		return serviceAgentState;
 	}
 	/**
@@ -103,6 +103,11 @@ public class ServiceAgentMessage extends AbstractMessage {
 	public Double getAverageTOConnexion() {
 		return averageTOConnexion;
 	}
+
+	public Ref<AbstractMessage> getRefServiceAgent() {
+		return refServiceAgent;
+	}
+	
 	
 	
 	
