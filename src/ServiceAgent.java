@@ -38,7 +38,7 @@ public class ServiceAgent extends Agent {
 
 	// liste contenant les propositions des agents contextes
 	private ArrayList<ContextAgentProposition> contextPropositions;
-	Map<ServiceAgentMessage, ArrayList<ContextAgentProposition>> listProp;
+	private Map<ServiceAgentMessage, ArrayList<ContextAgentProposition>> listProp;
 
 	private ArrayList<ServiceAgentMessage> serviceAgentMessages;
 
@@ -56,7 +56,18 @@ public class ServiceAgent extends Agent {
 	// proposition
 	private ArrayList<ServiceAgentMessage> listOfSAMNoProposition;
 	// Attribute contains a list of all actions possibles
-	private Set<Action> setOfAllActions;
+	//private Set<Action> setOfAllActions;
+
+	// Attribute contains the number of link used. By default, nbLink = 0. If
+	// service agent connect to an other agent service, nbLink is incremented
+	private int nbLink;
+	// Attribute contains the confidence value. By defaut confidence = 0.5. This
+	// value is calculated by the service agent itself. Firstly, we look the
+	// statistics of the number of messages accepted of each action
+	private double confidence;
+	// list of actions choosed and don't have a proposition of context agent.
+	// Contexte agent is null
+	private ArrayList<ArrayList<ContextAgentProposition>> actionsChoosedByItSelf;
 
 	// private HashMap<Agent, Pair<Boolean, ArrayList<Agent>>> etatsVoisins;
 
@@ -79,7 +90,12 @@ public class ServiceAgent extends Agent {
 		// Pair<ArrayList<ContextAgentProposition>,ArrayList<ContextAgentProposition>>>();
 		this.listContextAgentNonSelected = new ArrayList<ArrayList<ContextAgentProposition>>();
 		this.listOfSAMNoProposition = new ArrayList<ServiceAgentMessage>();
-		this.setOfAllActions = new HashSet<Action>();
+		//this.setOfAllActions = new HashSet<Action>();
+		this.nbLink = 0;
+		// we can not modify this with a global evaluation
+		this.confidence = this.RECOMPENSE;
+		this.actionsChoosedByItSelf = new ArrayList<ArrayList<ContextAgentProposition>>();
+		this.cardinality = 1;
 
 	}
 
@@ -98,6 +114,15 @@ public class ServiceAgent extends Agent {
 		messageBox = (IMsgBox<AbstractMessage>) AgentMessaging.getMsgBox(id,
 				AbstractMessage.class);
 		msgBoxHAgent = new SAMsgBoxHistoryAgent(this);
+		// this.listPropSorted = new HashMap<ServiceAgentMessage,
+		// Pair<ArrayList<ContextAgentProposition>,ArrayList<ContextAgentProposition>>>();
+		this.listContextAgentNonSelected = new ArrayList<ArrayList<ContextAgentProposition>>();
+		this.listOfSAMNoProposition = new ArrayList<ServiceAgentMessage>();
+		//this.setOfAllActions = new HashSet<Action>();
+		this.nbLink = 0;
+		// we can not modify this with a global evaluation
+		this.confidence = this.RECOMPENSE;
+		this.actionsChoosedByItSelf = new ArrayList<ArrayList<ContextAgentProposition>>();
 		this.cardinality = cardinality;
 
 	}
@@ -106,6 +131,10 @@ public class ServiceAgent extends Agent {
 
 	public int getCountIdContextAgents() {
 		return countIdContextAgents;
+	}
+
+	public Double getConfidence() {
+		return new Double(confidence);
 	}
 
 	public IMsgBox<AbstractMessage> getMessageBox() {
@@ -180,7 +209,7 @@ public class ServiceAgent extends Agent {
 		// clear choosen actions matrix
 		this.choosenActions.clear();
 
-		// recuperer la liste des messages
+		// get the list of messages
 		if (!listProp.isEmpty()) {
 
 			Set<ServiceAgentMessage> listMessage = this.listProp.keySet();
@@ -224,65 +253,257 @@ public class ServiceAgent extends Agent {
 			// only one action
 			// TODO: positive feedback? yes?
 
-		} else {
-			// TODO: when no proposition
-			decideOnlyForChoiceAction();
-
 		}
+		// TODO: when no proposition
+		/**
+		 * the method decideOnlyForChoiceAction allows to choose actions when no
+		 * propositions of context agents are available
+		 */
+		decideOnlyForChoiceAction();
+		// sort the list containing the actions choosed by service agent
+		//on peut supprimer cette boucle parce que chaque liste contient un seul element
+		for (ArrayList<ContextAgentProposition> listCANoProposition : this.actionsChoosedByItSelf) {
+			Collections.sort(listCANoProposition, cANoPropositionComparator);
+		}
+		// sort a list of list
+		Collections.sort(this.actionsChoosedByItSelf, sAListComparator);
+		// allow to sort all actions (actions proposed by context agent and
+		// actions choosed by itself) and all of theses actions is stored in
+		// choosenActions
+		this.choosenActions = sort2Matrices();
 
-		// this.creerFils();
 	}
 
+	// private void decideOnlyForChoiceAction() {
+	// // TODO Auto-generated method stub
+	// // if no action is executed then create a new context agent assaciated
+	// // with the action choosed
+	// if (!this.listOfSAMNoProposition.isEmpty()) {
+	// for (ServiceAgentMessage sAM : this.listOfSAMNoProposition) {
+	// // get action
+	// Action action = sAM.getMessageType();
+	// // Make the sort of the confidence of service agent here in the
+	// // prestep or post step.
+	// ArrayList<ServiceAgent> listSA = this.isConnected.getSecond();
+	// Collections.sort(listSA, sAComparator);
+	// switch (action) {
+	// case ANNONCER:
+	// // if the service agent isn't connected
+	// if (!this.isConnected.getFirst()) {
+	// // view the set of action. if this set contains the
+	// // action REPONDRE then create a new context agent and
+	// // send negative feedback to the context agent with the
+	// // action REPONDRE or ask to delete itself
+	// if (!this.setOfAllActions.contains(Action.REPONDRE)) {
+	// // createContextAgent(Action.REPONDRE);
+	// this.setOfAllActions.add(Action.REPONDRE);
+	// this.actionsChoosedByItSelf.add(Action.REPONDRE);
+	// } else {
+	// // it is a problem with the context agent which not
+	// // propose his action. send a negative feedback.
+	// // (For example, when the SA is connected but after
+	// // some time, SA is deconnected)
+	// //not true
+	// }
+	// } else {
+	// // if the service agent is connected
+	// // compare confidence of service agents of agent service
+	// // with others
+	// if (this.nbLink >= this.cardinality) {
+	//
+	// this.actionsChoosedByItSelf.add((listSA.get(0)
+	// .getConfidence() < sAM.getServiceAgent()
+	// .getConfidence()) ? Action.REPONDRE
+	// : Action.NERIENFAIRE);
+	//
+	// } else {
+	// this.actionsChoosedByItSelf.add(Action.REPONDRE);
+	// // this.nbLink++;
+	// }
+	//
+	// }
+	// break;
+	// case REPONDRE:
+	// if (!this.isConnected.getFirst()) {
+	// //if service agent is not connected then demand accept
+	// this.setOfAllActions.add(Action.SECONNECTER);
+	// this.actionsChoosedByItSelf.add(Action.SECONNECTER);
+	// } else {
+	// if (this.nbLink >= this.cardinality) {
+	// //
+	// this.actionsChoosedByItSelf.add((listSA.get(0)
+	// .getConfidence() < sAM.getServiceAgent()
+	// .getConfidence()) ? Action.SECONNECTER
+	// : Action.NERIENFAIRE);
+	//
+	// } else {
+	// this.actionsChoosedByItSelf.add(Action.REPONDRE);
+	// // this.nbLink++;
+	// }
+	//
+	// }
+	// break;
+	// case SECONNECTER:
+	// break;
+	// case SEDECONNECTER:
+	// break;
+	// case NERIENFAIRE:
+	// break;
+	// default:
+	// break;
+	// }
+	// /*
+	// * if (this.setOfAllActions.contains(action)) { // There is a
+	// * context agent created with this action. If no // context
+	// * agent is associated with action in the set then // remove
+	// * this action from the set. Some context agents // exist but
+	// * not valid
+	// *
+	// * createContextAgent(action);
+	// *
+	// * } else { createContextAgent(action);
+	// * this.setOfAllActions.add(action); }
+	// */
+	// }
+	// } else {
+	// // No context agents propositions and no messages received from
+	// // others. So view the state of Service agent
+	// }
+	// }
+	/**
+	 * This method allow to merge the two arrays (this.choosenActions and this.actionsChoosedByItSelf) and to order them
+	 * @return
+	 */
+	private ArrayList<ArrayList<ContextAgentProposition>> sort2Matrices() {
+		// TODO Auto-generated method stub
+		ArrayList<ArrayList<ContextAgentProposition>> tmp = new ArrayList<ArrayList<ContextAgentProposition>>();
+		int indexChoosenList = 0;
+		int indexChoosedBySelf = 0;
+
+		while ((indexChoosenList != this.choosenActions.size())
+				&& (indexChoosedBySelf != this.actionsChoosedByItSelf.size())) {
+			// look the array of actions choosed by itself to sort the final list
+			// the first element of of arrayList cap is greater or equal
+			// than the element of indexChoosenList-th of the first element
+			// of
+			ArrayList<ContextAgentProposition> choosenActionArrayList = this.choosenActions
+					.get(indexChoosenList);
+			ArrayList<ContextAgentProposition> chooseBySelfArrayList = this.actionsChoosedByItSelf
+					.get(indexChoosedBySelf);
+			if (chooseBySelfArrayList.get(0).getServiceAgentMessage()
+					.getServiceAgent().getConfidence() >= choosenActionArrayList
+					.get(0).getServiceAgentMessage().getServiceAgent()
+					.getConfidence()) {
+				tmp.add(chooseBySelfArrayList);
+				indexChoosedBySelf++;
+
+			} else {
+				tmp.add(choosenActionArrayList);
+				indexChoosenList++;
+			}
+		}
+		
+		if(indexChoosenList == this.choosenActions.size()){
+			for(int i = indexChoosedBySelf; i < this.actionsChoosedByItSelf.size(); i++){
+				tmp.add(this.actionsChoosedByItSelf.get(i));
+			}
+		} else {
+			for(int i = indexChoosenList; i < this.actionsChoosedByItSelf.size(); i++){
+				tmp.add(this.choosenActions.get(i));
+			}
+		}
+		return tmp;
+	}
+	/**
+	 * the method decideOnlyForChoiceAction allows to choose actions when no
+	 * propositions of context agents are available
+	 */
 	private void decideOnlyForChoiceAction() {
 		// TODO Auto-generated method stub
-		// if no action is executed then create a new context agent assaciated
-		// with the action choosed
 		if (!this.listOfSAMNoProposition.isEmpty()) {
 			for (ServiceAgentMessage sAM : this.listOfSAMNoProposition) {
 				// get action
 				Action action = sAM.getMessageType();
+				// Make the sort of the confidence of service agent here in the
+				// prestep or post step.
+				ContextAgentProposition cap;
+				ArrayList<ContextAgentProposition> listCAP;
 				switch (action) {
 				case ANNONCER:
-					// if the service agent isn't connected
-					if (!this.isConnected.getFirst()) {
-						// view the set of action. if this set contains the
-						// action REPONDRE then create a new context agent and
-						// send negative feedback to the context agent with the
-						// action REPONDRE or ask to delete itself
-						if (!this.setOfAllActions.contains(Action.REPONDRE)) {
-							createContextAgent(Action.REPONDRE);
-							this.setOfAllActions.add(Action.REPONDRE);
-						} else {
-							// it is a problem with the context agent which not
-							// propose his action. send a negative feedback. (For example, when the SA is connected but after some time, SA is deconnected)
-						}
-					} else {
-						//if the service agent is connected
-						
-					}
+					cap = new ContextAgentProposition(null, Action.REPONDRE,
+							sAM);
+					listCAP = new ArrayList<ContextAgentProposition>();
+					listCAP.add(cap);
+					this.actionsChoosedByItSelf.add(listCAP);
+					break;
+				case REPONDRE:
+					cap = new ContextAgentProposition(null, Action.SECONNECTER,
+							sAM);
+					listCAP = new ArrayList<ContextAgentProposition>();
+					listCAP.add(cap);
+					this.actionsChoosedByItSelf.add(listCAP);
+					// this.actionsChoosedByItSelf.add(Action.SECONNECTER);
+					break;
+				case SECONNECTER:
+					cap = new ContextAgentProposition(null,
+							Action.SECONNECTERPHYSIQUEMENT, sAM);
+					listCAP = new ArrayList<ContextAgentProposition>();
+					listCAP.add(cap);
+					this.actionsChoosedByItSelf.add(listCAP);
+					// this.actionsChoosedByItSelf.get(0).get(0).getServiceAgentMessage().getServiceAgent().getConfidence();
+					// this.actionsChoosedByItSelf.add(Action.SECONNECTERPHYSIQUEMENT);
+					break;
+				case SEDECONNECTER:
+					// reduce the cardinality
+					cap = new ContextAgentProposition(null, Action.NERIENFAIRE,
+							sAM);
+					listCAP = new ArrayList<ContextAgentProposition>();
+					listCAP.add(cap);
+					this.actionsChoosedByItSelf.add(listCAP);
+					// this.actionsChoosedByItSelf.add(Action.NERIENFAIRE);
+					break;
+				case NERIENFAIRE:
+					cap = new ContextAgentProposition(null, Action.NERIENFAIRE,
+							sAM);
+					listCAP = new ArrayList<ContextAgentProposition>();
+					listCAP.add(cap);
+					this.actionsChoosedByItSelf.add(listCAP);
+					// this.actionsChoosedByItSelf.add(Action.NERIENFAIRE);
+					break;
+				default:
+					//normalement pas d'entrée dans default aprceque toutes les actions sont listées
+					cap = new ContextAgentProposition(null, Action.NERIENFAIRE,
+							sAM);
+					listCAP = new ArrayList<ContextAgentProposition>();
+					listCAP.add(cap);
+					this.actionsChoosedByItSelf.add(listCAP);
+					// this.actionsChoosedByItSelf.add(Action.NERIENFAIRE);
 					break;
 				}
-				/*if (this.setOfAllActions.contains(action)) {
-					// There is a context agent created with this action. If no
-					// context agent is associated with action in the set then
-					// remove this action from the set. Some context agents
-					// exist but not valid
-
-					createContextAgent(action);
-
-				} else {
-					createContextAgent(action);
-					this.setOfAllActions.add(action);
-				}*/
 			}
-		} else {
-			// No context agents propositions and no messages received from
-			// others. So view the state of Service agent
 		}
+
 	}
 
-	private void createContextAgent(Action action) {
+	/**
+	 * This method allows to create a context agent and add it to the list of
+	 * context agents
+	 * 
+	 * @param action
+	 * @param cAA
+	 */
+	private void createContextAgent(Action action,
+			ArrayList<ContextAgentProposition> cAA) {
 		// TODO Auto-generated method stub
+		// ContextAgent ca = new ContextAgent(senderType, messageType,
+		// neightboursState, serviceAgentState, actionPerformed, serviceAgent,
+		// confidence, id);
+		ContextAgent ca = new ContextAgent(this.instanceAgent.getType()
+				.toString(), cAA.get(0).getServiceAgentMessage()
+				.getMessageType(), this.instanceAgent.getNeightboursState(this),
+				this.isConnected, action, this, ServiceAgent.RECOMPENSE,
+				this.id);
+		this.contextAgents.add(ca);
 
 	}
 
@@ -294,6 +515,39 @@ public class ServiceAgent extends Agent {
 		}
 	};
 
+	// definition of comparator of service agent confidence
+	private static Comparator<ContextAgentProposition> cANoPropositionComparator = new Comparator<ContextAgentProposition>() {
+
+		@Override
+		public int compare(ContextAgentProposition cAP1,
+				ContextAgentProposition cAP2) {
+			// TODO Auto-generated method stub
+			return cAP1
+					.getServiceAgentMessage()
+					.getServiceAgent()
+					.getConfidence()
+					.compareTo(
+							cAP2.getServiceAgentMessage().getServiceAgent()
+									.getConfidence());
+		}
+	};
+
+	private static Comparator<ArrayList<ContextAgentProposition>> sAListComparator = new Comparator<ArrayList<ContextAgentProposition>>() {
+		@Override
+		public int compare(ArrayList<ContextAgentProposition> acap1,
+				ArrayList<ContextAgentProposition> acap2) {
+			return acap2
+					.get(acap2.size() - 1)
+					.getServiceAgentMessage()
+					.getServiceAgent()
+					.getConfidence()
+					.compareTo(
+							acap1.get(acap1.size() - 1)
+									.getServiceAgentMessage().getServiceAgent()
+									.getConfidence());
+		}
+	};
+
 	private static Comparator<ArrayList<ContextAgentProposition>> myComparatorOfConfidenceList = new Comparator<ArrayList<ContextAgentProposition>>() {
 		@Override
 		public int compare(ArrayList<ContextAgentProposition> acap1,
@@ -301,6 +555,17 @@ public class ServiceAgent extends Agent {
 			return acap1.get(acap1.size() - 1).getConfidenceD()
 					.compareTo(acap2.get(acap2.size() - 1).getConfidenceD());
 		}
+	};
+
+	// comparator service agent proposition
+	private static Comparator<ServiceAgent> sAComparator = new Comparator<ServiceAgent>() {
+
+		@Override
+		public int compare(ServiceAgent sA0, ServiceAgent sA1) {
+			// TODO Auto-generated method stub
+			return sA0.getConfidence().compareTo(sA1.getConfidence());
+		}
+
 	};
 
 	private ArrayList<ArrayList<ContextAgentProposition>> getOrderedListOfBestActions() {
@@ -335,40 +600,43 @@ public class ServiceAgent extends Agent {
 		return actionsSortedByMessage;
 	}
 
+	/**
+	 * 
+	 * @param subPropList
+	 *            is not empty because it is tested in the method decide()
+	 * @param m
+	 * @return
+	 */
 	private ArrayList<ContextAgentProposition> eliminateContradictoryActionsAndFeedbackThem(
 			ArrayList<ContextAgentProposition> subPropList,
 			ServiceAgentMessage m) {
 
-		List<ContextAgentProposition> listOfNonSelectedAC = new ArrayList<ContextAgentProposition>();
+		// List<ContextAgentProposition> listOfNonSelectedAC = new
+		// ArrayList<ContextAgentProposition>();
 		List<ContextAgentProposition> subPropListTmp = subPropList;
 		// Array list contains the removed elements
 		ArrayList<ContextAgentProposition> listOfRemovedAC = new ArrayList<ContextAgentProposition>();
 		ContextAgentProposition contextAgentBestConfidence = null;
-		if (subPropList.isEmpty()) {
-			contextAgentBestConfidence = subPropList
-					.get(subPropList.size() - 1);
-			for (ContextAgentProposition cAP : subPropList) {
-				if (cAP.getConfidence() > contextAgentBestConfidence
-						.getConfidence()) {
-					contextAgentBestConfidence = cAP;
-				}
+		contextAgentBestConfidence = subPropList.get(subPropList.size() - 1);
+		for (ContextAgentProposition cAP : subPropList) {
+			if (cAP.getConfidence() > contextAgentBestConfidence
+					.getConfidence()) {
+				contextAgentBestConfidence = cAP;
 			}
-			// for (Pair<ContextAgent, Action> pCA : subPropList){
-			for (int i = subPropListTmp.size() - 1; i >= 0; i--) {
-				if (subPropListTmp.get(i).getAction()
-						.equals(contextAgentBestConfidence.getAction())) {
-					// TODO: positive feedback?: no ?
-				} else {
-					listOfNonSelectedAC.add(subPropList.get(i));
-					listOfRemovedAC.add(subPropList.get(i));
-					subPropList.remove(i);
-					// TODO: negative feedback
-				}
-			}
-		} else {
-
-			// TODO:Error
 		}
+		// for (Pair<ContextAgent, Action> pCA : subPropList){
+		for (int i = subPropListTmp.size() - 1; i >= 0; i--) {
+			if (subPropListTmp.get(i).getAction()
+					.equals(contextAgentBestConfidence.getAction())) {
+				// TODO: positive feedback?: no ?
+			} else {
+				// listOfNonSelectedAC.add(subPropList.get(i));
+				listOfRemovedAC.add(subPropList.get(i));
+				subPropList.remove(i);
+				// TODO: negative feedback
+			}
+		}
+
 		this.listContextAgentNonSelected.add(listOfRemovedAC);
 		return subPropList;
 	}
@@ -391,90 +659,474 @@ public class ServiceAgent extends Agent {
 		return null;
 	}
 
+	private Action factorize(ArrayList<ContextAgentProposition> cAA,
+			ServiceAgentMessage sAM, int nbOfConnection,
+			double averageTOConnexion, Action actionToBeExecute,
+			ArrayList<ServiceAgent> sAConnected) {
+		Action action;
+
+		if (cAA.get(0).getServiceAgentMessage().getServiceAgent()
+				.getConfidence() > sAConnected.get(0).getConfidence()) {
+			action = actionToBeExecute;
+			sAM = new ServiceAgentMessage(this.cardinality, null, action,
+					this.isConnected, ServiceAgent.defaultNbOfConnection,
+					ServiceAgent.defaultAverageTime, this);
+			// execute the action
+			if (actionToBeExecute == Action.ANNONCER) {
+				this.messageBox.send(sAM,
+						this.instanceAgent.getRefInstanceAgent());
+			} else {
+				this.messageBox.send(sAM, cAA.get(0).getServiceAgentMessage()
+						.getRefServiceAgent());
+				// no feedback for context agents and create context
+				// agent
+				// this.createContextAgent(action);
+			}
+			if (cAA.get(0).getContextAgent() != null) {
+				// feedback to context agents
+				// give feedbacks for all agents contexts are
+				// proposed this action
+				for (ContextAgentProposition cAP : cAA) {
+					cAP.getContextAgent().setFeedBack(1);
+				}
+			}
+
+		} else {
+			action = Action.NERIENFAIRE;
+			sAM = new ServiceAgentMessage(this.cardinality, null, action,
+					this.isConnected, nbOfConnection, averageTOConnexion, this);
+			// execute the action
+			this.messageBox.send(sAM, cAA.get(0).getServiceAgentMessage()
+					.getRefServiceAgent());
+			if (cAA.get(0).getContextAgent() == null) {
+				// neagtive feedback because the action proposed by
+				// context agents is not choosed
+				for (ContextAgentProposition cAP : cAA) {
+					cAP.getContextAgent().setFeedBack(0);
+
+				}
+			}
+		}
+		return action;
+	}
+
 	@Override
 	protected void act() {
 		// TODO Auto-generated method stub
 		if (!this.choosenActions.isEmpty()) {
-			for (ArrayList<ContextAgentProposition> cAA : this.choosenActions) {
-				// get list of context agents propositions answered for a
-				// message
-				// ArrayList<ContextAgentProposition> contextAgentAnswered =
-				// this.choosenActions.
-
+			// number of connection to rest
+			int nbConnectionRemain = this.cardinality - this.nbLink;
+			ArrayList<ContextAgentProposition> cAA;
+			ServiceAgentMessage sAM = null;
+			Pair<Integer, Double> connAndTime = this.nbOfConnectionAndAverageTime
+					.get(this.id);
+			int nbOfConnection = connAndTime.getFirst();
+			double averageTOConnexion = connAndTime.getSecond();
+			int index = 0;
+			while (nbConnectionRemain > 0
+					&& (index < this.choosenActions.size())) { // while the
+																// number of
+																// connection
+																// remaining is
+																// greater than
+																// 0 or at the
+																// end of
+																// this.choosenActions
+				// treat actions when the service agent have some connections
+				// available
+				cAA = this.choosenActions.get(index);
+				index++;
+				Action actionToBeExecute = cAA.get(0).getAction();
 				if (!cAA.isEmpty()) {
-					// get action to be executed by service agent
-					Action actionToBeExecute = cAA.get(0).getAction();
-					ServiceAgentMessage sAM = null;
-					Pair<Integer, Double> connAndTime = this.nbOfConnectionAndAverageTime
-							.get(this.id);
-					int nbOfConnection = connAndTime.getFirst();
-					double averageTOConnexion = connAndTime.getSecond();
-					switch (actionToBeExecute) {
-					case ANNONCER:
-						// construct the message to be sended
-						sAM = new ServiceAgentMessage(this.cardinality, null,
-								actionToBeExecute, this.isConnected,
-								ServiceAgent.defaultNbOfConnection,
-								ServiceAgent.defaultAverageTime, this);
-						// Execute action. Here send the message to Instance
-						// Agent
-						break;
-					case REPONDRE:
-						// build the reponse message to be sended
-						sAM = new ServiceAgentMessage(this.cardinality,
-								this.instanceAgent.getType().toString(),
-								actionToBeExecute, this.isConnected,
-								nbOfConnection, averageTOConnexion, this);
+					// test if the action is the one choosed by the service
+					// agent
+					if ((cAA.size() == 1)
+							&& (cAA.get(0).getContextAgent() == null)) {
 
-						break;
-					case SECONNECTER:
-						// build the connection message to be sended
-						sAM = new ServiceAgentMessage(this.cardinality,
-								this.instanceAgent.getType().toString(),
-								actionToBeExecute, this.isConnected,
-								nbOfConnection, averageTOConnexion, this);
-
-						break;
-					case SEDECONNECTER:
-						sAM = new ServiceAgentMessage(this.cardinality,
-								this.instanceAgent.getType().toString(),
-								actionToBeExecute, this.isConnected,
-								nbOfConnection, averageTOConnexion, this);
-
-						break;
-					case NERIENFAIRE:
-						sAM = new ServiceAgentMessage(this.cardinality,
-								this.instanceAgent.getType().toString(),
-								actionToBeExecute, this.isConnected,
-								nbOfConnection, averageTOConnexion, this);
-						// or not send message to the service agent
-						break;
-					default:
-						break;
-
-					}
-					this.messageBox.send(sAM, cAA.get(0)
-							.getServiceAgentMessage().getRefServiceAgent());
-
-					// give feedbacks for agents contexts
-					for (ContextAgentProposition cAP : cAA) {
-						cAP.getContextAgent().setFeedBack(1);
-
+						nbConnectionRemain = this.sendMessage(
+								actionToBeExecute, cAA.get(0)
+										.getServiceAgentMessage()
+										.getRefServiceAgent(), sAM,
+								nbOfConnection, averageTOConnexion,
+								nbConnectionRemain, true, cAA);
+						// end of if when the action is choosed by the service
+						// agent
+					} else { // when the actions by the proposition of context
+								// agent
+						nbConnectionRemain = this.sendMessage(
+								actionToBeExecute, cAA.get(0)
+										.getServiceAgentMessage()
+										.getRefServiceAgent(), sAM,
+								nbOfConnection, averageTOConnexion,
+								nbConnectionRemain, false, cAA);
 					}
 
 				}
 
-			}
-			// to optimize the feedback of context where their actions
-			// are not good
-			if (!this.listContextAgentNonSelected.isEmpty()) {
-				for (ArrayList<ContextAgentProposition> listCAP : this.listContextAgentNonSelected) {
-					sendFeedBack(listCAP);
+			}// end while
+				// il faut regarder les agents services avec les quels il est
+				// connecté
+			ArrayList<ServiceAgent> sAConnected = this.isConnected.getSecond();
+			// sort theses services agents by their confidence
+			Collections.sort(sAConnected, sAComparator);
+			// We go in in this loop only where the number of connection is
+			// greater or equal than the cardinality
+			for (int i = index; i < this.choosenActions.size(); i++) {
+				cAA = this.choosenActions.get(index);
+				Action actionToBeExecute = cAA.get(0).getAction();
+				Action action;
+				switch (actionToBeExecute) {
+				case ANNONCER:
+
+					// if context agent propose an action then compare the
+					// context agent's confidence with the service agent
+					// confidence
+					// else compare the service agent (itself) confidence with
+					// the service agent with the smallest confidence
+					if ((cAA.size() == 1)
+							&& (cAA.get(0).getContextAgent() == null)) {
+						// no proposition of the context agent then compare
+						// service agent confidence with the confidence of
+						// connected service agents
+						action = this.factorize(cAA, sAM, nbOfConnection,
+								averageTOConnexion, actionToBeExecute,
+								sAConnected);
+						// create context agent
+						this.createContextAgent(action, cAA);
+
+					} else {
+						// proposition of context agent
+						// Action action = (cAA.get(0).getConfidence() >
+						// sAConnected.get(0).getConfidence()) ? Action.ANNONCER
+						// : Action.NERIENFAIRE;
+
+						// si l'action propose par l'agent contexte est bonne
+						/*
+						 * if (cAA.get(0).getConfidence() > sAConnected.get(0)
+						 * .getConfidence()) { action = Action.ANNONCER; //
+						 * response to the context agent and service agent //
+						 * which send the message sAM = new
+						 * ServiceAgentMessage(this.cardinality, null, action,
+						 * this.isConnected, ServiceAgent.defaultNbOfConnection,
+						 * ServiceAgent.defaultAverageTime, this); // execute
+						 * the action this.messageBox.send(sAM,
+						 * this.instanceAgent.getRefInstanceAgent()); //
+						 * feedback to context agents // give feedbacks for all
+						 * agents contexts are // proposed this action for
+						 * (ContextAgentProposition cAP : cAA) {
+						 * cAP.getContextAgent().setFeedBack(1);
+						 * 
+						 * }
+						 * 
+						 * } else { // action proposee
+						 * cAA.get(0).getConfidence() a // une confiance plus
+						 * faible que // sAConnected.get(0).getConfidence() où
+						 * // sAConnected contient la liste des agents //
+						 * services connectes a this action =
+						 * Action.NERIENFAIRE; sAM = new
+						 * ServiceAgentMessage(this.cardinality, null, action,
+						 * this.isConnected, nbOfConnection, averageTOConnexion,
+						 * this); // execute the action
+						 * this.messageBox.send(sAM, cAA.get(0)
+						 * .getServiceAgentMessage() .getRefServiceAgent()); //
+						 * neagtive feedback because the action proposed by //
+						 * context agents is not choosed for
+						 * (ContextAgentProposition cAP : cAA) {
+						 * cAP.getContextAgent().setFeedBack(0);
+						 * 
+						 * }
+						 * 
+						 * }
+						 */
+						action = this.factorize(cAA, sAM, nbOfConnection,
+								averageTOConnexion, actionToBeExecute,
+								sAConnected);
+
+					}
+					// creer une fonction pour factoriser le code
+					break;
+				case REPONDRE:
+					// L'action repondre est choisie. Il se peut que cette
+					// action soit validée définitivement ou l'action ne rien
+					// faire sera choisie
+					if ((cAA.size() == 1)
+							&& (cAA.get(0).getContextAgent() == null)) {
+						// no proposition of the context agent then compare
+						// service agent confidence with the confidence of
+						// connected service agents
+						action = this.factorize(cAA, sAM, nbOfConnection,
+								averageTOConnexion, actionToBeExecute,
+								sAConnected);
+						// create context agent
+						this.createContextAgent(action, cAA);
+
+					} else {
+						// proposition of context agent
+						// Action action = (cAA.get(0).getConfidence() >
+						// sAConnected.get(0).getConfidence()) ? Action.ANNONCER
+						// : Action.NERIENFAIRE;
+
+						// si l'action propose par l'agent contexte est bonne
+						action = this.factorize(cAA, sAM, nbOfConnection,
+								averageTOConnexion, actionToBeExecute,
+								sAConnected);
+
+					}
+					break;
+				case SECONNECTER:
+					// L'action seconnecter est choisie. Il se peut que cette
+					// action soit validée définitivement ou l'action ne rien
+					// faire sera choisie
+					if ((cAA.size() == 1)
+							&& (cAA.get(0).getContextAgent() == null)) {
+						// no proposition of the context agent then compare
+						// service agent confidence with the confidence of
+						// connected service agents
+						action = this.factorize(cAA, sAM, nbOfConnection,
+								averageTOConnexion, actionToBeExecute,
+								sAConnected);
+						// create context agent
+						this.createContextAgent(action, cAA);
+
+					} else {
+						// proposition of context agent
+						// Action action = (cAA.get(0).getConfidence() >
+						// sAConnected.get(0).getConfidence()) ? Action.ANNONCER
+						// : Action.NERIENFAIRE;
+
+						// si l'action propose par l'agent contexte est bonne
+						action = this.factorize(cAA, sAM, nbOfConnection,
+								averageTOConnexion, actionToBeExecute,
+								sAConnected);
+
+					}
+					break;
+				case SECONNECTERPHYSIQUEMENT:
+					// la connection physique fera appel à des fonction WComp
+					if ((cAA.size() == 1)
+							&& (cAA.get(0).getContextAgent() == null)) {
+						// no proposition of the context agent then compare
+						// service agent confidence with the confidence of
+						// connected service agents
+						action = this.factorize(cAA, sAM, nbOfConnection,
+								averageTOConnexion, actionToBeExecute,
+								sAConnected);
+						// create context agent
+						this.createContextAgent(action, cAA);
+
+					} else {
+						// proposition of context agent
+						// Action action = (cAA.get(0).getConfidence() >
+						// sAConnected.get(0).getConfidence()) ? Action.ANNONCER
+						// : Action.NERIENFAIRE;
+
+						// si l'action propose par l'agent contexte est bonne
+						action = this.factorize(cAA, sAM, nbOfConnection,
+								averageTOConnexion, actionToBeExecute,
+								sAConnected);
+
+					}
+					// incremente the number of link
+					this.nbLink++;
+					break;
+				case SEDECONNECTER:
+					if ((cAA.size() == 1)
+							&& (cAA.get(0).getContextAgent() == null)) {
+						// no proposition of the context agent then compare
+						// service agent confidence with the confidence of
+						// connected service agents
+						action = this.factorize(cAA, sAM, nbOfConnection,
+								averageTOConnexion, actionToBeExecute,
+								sAConnected);
+						// create context agent
+						this.createContextAgent(action, cAA);
+
+					} else {
+						// proposition of context agent
+						// Action action = (cAA.get(0).getConfidence() >
+						// sAConnected.get(0).getConfidence()) ? Action.ANNONCER
+						// : Action.NERIENFAIRE;
+
+						// si l'action propose par l'agent contexte est bonne
+						action = this.factorize(cAA, sAM, nbOfConnection,
+								averageTOConnexion, actionToBeExecute,
+								sAConnected);
+
+					}
+					// decremente the number of link
+					this.nbLink--;
+					break;
+				case NERIENFAIRE:
+					if ((cAA.size() == 1)
+							&& (cAA.get(0).getContextAgent() == null)) {
+						// no proposition of the context agent then compare
+						// service agent confidence with the confidence of
+						// connected service agents
+						action = this.factorize(cAA, sAM, nbOfConnection,
+								averageTOConnexion, actionToBeExecute,
+								sAConnected);
+						// create context agent
+						this.createContextAgent(action, cAA);
+
+					} else {
+						// proposition of context agent
+						// Action action = (cAA.get(0).getConfidence() >
+						// sAConnected.get(0).getConfidence()) ? Action.ANNONCER
+						// : Action.NERIENFAIRE;
+
+						// si l'action propose par l'agent contexte est bonne
+						action = this.factorize(cAA, sAM, nbOfConnection,
+								averageTOConnexion, actionToBeExecute,
+								sAConnected);
+
+					}
+					break;
+				default:
+					break;
 				}
+
 			}
 
 		}
 
+		// no cardinality is avalaible
+		/*
+		 * for (int i = index; i < this.choosenActions.size(); i++) { // il faut
+		 * regarder les agents services avec les quels il est // connecté
+		 * 
+		 * for (int i = nbConnectionRemain + 1; i < this.choosenActions.size();
+		 * i++) {
+		 * 
+		 * }
+		 * 
+		 * for (ArrayList<ContextAgentProposition> cAA : this.choosenActions) {
+		 * // get list of context agents propositions answered for a // message
+		 * or the action choosed by the agent service //
+		 * ArrayList<ContextAgentProposition> contextAgentAnswered = //
+		 * this.choosenActions.
+		 * 
+		 * if (!cAA.isEmpty()) { // test if the action is the one choosed by the
+		 * service // agent if ((cAA.size() == 1) &&
+		 * (cAA.get(0).getContextAgent() == null)) {
+		 * 
+		 * } // get action to be executed by service agent Action
+		 * actionToBeExecute = cAA.get(0).getAction(); ServiceAgentMessage sAM =
+		 * null; Pair<Integer, Double> connAndTime =
+		 * this.nbOfConnectionAndAverageTime .get(this.id); int nbOfConnection =
+		 * connAndTime.getFirst(); double averageTOConnexion =
+		 * connAndTime.getSecond(); switch (actionToBeExecute) { case ANNONCER:
+		 * // construct the message to be sended sAM = new
+		 * ServiceAgentMessage(this.cardinality, null, actionToBeExecute,
+		 * this.isConnected, ServiceAgent.defaultNbOfConnection,
+		 * ServiceAgent.defaultAverageTime, this); // Execute action. Here send
+		 * the message to Instance // Agent break; case REPONDRE: // build the
+		 * reponse message to be sended sAM = new
+		 * ServiceAgentMessage(this.cardinality,
+		 * this.instanceAgent.getType().toString(), actionToBeExecute,
+		 * this.isConnected, nbOfConnection, averageTOConnexion, this);
+		 * 
+		 * break; case SECONNECTER: // build the connection message to be sended
+		 * sAM = new ServiceAgentMessage(this.cardinality,
+		 * this.instanceAgent.getType().toString(), actionToBeExecute,
+		 * this.isConnected, nbOfConnection, averageTOConnexion, this);
+		 * 
+		 * break; case SEDECONNECTER: sAM = new
+		 * ServiceAgentMessage(this.cardinality,
+		 * this.instanceAgent.getType().toString(), actionToBeExecute,
+		 * this.isConnected, nbOfConnection, averageTOConnexion, this);
+		 * 
+		 * break; case NERIENFAIRE: sAM = new
+		 * ServiceAgentMessage(this.cardinality,
+		 * this.instanceAgent.getType().toString(), actionToBeExecute,
+		 * this.isConnected, nbOfConnection, averageTOConnexion, this); // or
+		 * not send message to the service agent break; default: break;
+		 * 
+		 * } this.messageBox.send(sAM, cAA.get(0)
+		 * .getServiceAgentMessage().getRefServiceAgent());
+		 * 
+		 * // give feedbacks for agents contexts for (ContextAgentProposition
+		 * cAP : cAA) { cAP.getContextAgent().setFeedBack(1);
+		 * 
+		 * }
+		 * 
+		 * }
+		 * 
+		 * } // to optimize the feedback of context where their actions // are
+		 * not good if (!this.listContextAgentNonSelected.isEmpty()) { for
+		 * (ArrayList<ContextAgentProposition> listCAP :
+		 * this.listContextAgentNonSelected) { sendFeedBack(listCAP); } }
+		 * 
+		 * }
+		 */
+
+	}
+
+	private int sendMessage(Action actionToBeExecute,
+			Ref<AbstractMessage> serviceAgentRef, ServiceAgentMessage sAM,
+			int nbOfConnection, double averageTOConnexion,
+			int nbConnectionRemain, boolean createContextAgent,
+			ArrayList<ContextAgentProposition> cAA) {
+		switch (actionToBeExecute) {
+		case ANNONCER:
+			// construct the message to be sended
+			sAM = new ServiceAgentMessage(this.cardinality, null,
+					actionToBeExecute, this.isConnected,
+					ServiceAgent.defaultNbOfConnection,
+					ServiceAgent.defaultAverageTime, this);
+			// execute the action after and create context agent
+			// createContextAgent(Action.ANNONCER);
+			this.messageBox.send(sAM, this.instanceAgent.getRefInstanceAgent());
+			break;
+		case REPONDRE:
+			// build the reponse message to be sended
+			sAM = new ServiceAgentMessage(this.cardinality, this.instanceAgent
+					.getType().toString(), actionToBeExecute, this.isConnected,
+					nbOfConnection, averageTOConnexion, this);
+			// Execute action after
+			this.messageBox.send(sAM, serviceAgentRef);
+			break;
+		case SECONNECTER:
+			// build the connection message to be sended
+			sAM = new ServiceAgentMessage(this.cardinality, this.instanceAgent
+					.getType().toString(), actionToBeExecute, this.isConnected,
+					nbOfConnection, averageTOConnexion, this);
+			// create context agent
+			this.messageBox.send(sAM, serviceAgentRef);
+			break;
+		case SECONNECTERPHYSIQUEMENT:
+			// build the connection message to be sended
+			sAM = new ServiceAgentMessage(this.cardinality, this.instanceAgent
+					.getType().toString(), actionToBeExecute, this.isConnected,
+					nbOfConnection, averageTOConnexion, this);
+			// incremente the number of link
+			this.nbLink++;
+			nbConnectionRemain++;
+			this.messageBox.send(sAM, serviceAgentRef);
+			break;
+		case SEDECONNECTER:
+			sAM = new ServiceAgentMessage(this.cardinality, this.instanceAgent
+					.getType().toString(), actionToBeExecute, this.isConnected,
+					nbOfConnection, averageTOConnexion, this);
+			// decremente the number of link
+			this.nbLink--;
+			// a discuter s'il faut prendre en compte dans ce cycle ou au cycle
+			// suivant
+			nbConnectionRemain--;
+			this.messageBox.send(sAM, serviceAgentRef);
+			break;
+		case NERIENFAIRE:
+			sAM = new ServiceAgentMessage(this.cardinality, this.instanceAgent
+					.getType().toString(), actionToBeExecute, this.isConnected,
+					nbOfConnection, averageTOConnexion, this);
+			// or not send message to the service agent
+			this.messageBox.send(sAM, serviceAgentRef);
+			break;
+		default:
+			break;
+		}
+		if (createContextAgent)
+			createContextAgent(actionToBeExecute, cAA);
+		return nbConnectionRemain;
 	}
 
 	private void sendFeedBack(ArrayList<ContextAgentProposition> listCAP) {

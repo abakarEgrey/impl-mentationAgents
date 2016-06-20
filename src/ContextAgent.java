@@ -26,14 +26,14 @@ public class ContextAgent extends Agent {
 	// private double averageTOConnexion;
 	// private Cardinality
 
-	private ArrayList<Pair<Boolean, String>> neightboursState; // (same
+	private ArrayList<Pair<Boolean, ServiceAgent>> neightboursState; // (same
 																// instance,
 																// agent
 																// type)
 	private Action actionPerformed;
 	private String senderType;
 	private Action messageType;
-	private Pair<Boolean, String> serviceAgentState;
+	private Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState;
 
 	// Necessary for the perceive-decide-act cycle distinction
 	private boolean isValid;
@@ -65,8 +65,8 @@ public class ContextAgent extends Agent {
 	 * @param serviceAgent
 	 * @param confidence
 	 */
-	public ContextAgent(String senderType, Action messageType, ArrayList<Pair<Boolean, String>> neightboursState,
-			Pair<Boolean, String> serviceAgentState, Action actionPerformed, ServiceAgent serviceAgent,
+	public ContextAgent(String senderType, Action messageType, ArrayList<Pair<Boolean, ServiceAgent>> neightboursState,
+			Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState, Action actionPerformed, ServiceAgent serviceAgent,
 			double confidence, String id) {
 		this.id = id;
 		this.senderType = senderType;
@@ -166,11 +166,11 @@ public class ContextAgent extends Agent {
 		this.messageType = messageType;
 	}
 
-	public ArrayList<Pair<Boolean, String>> getNeightboursState() {
+	public ArrayList<Pair<Boolean, ServiceAgent>> getNeightboursState() {
 		return neightboursState;
 	}
 
-	private void setNeightboursState(ArrayList<Pair<Boolean, String>> neightboursState) {
+	private void setNeightboursState(ArrayList<Pair<Boolean, ServiceAgent>> neightboursState) {
 		this.neightboursState = neightboursState;
 	}
 
@@ -182,11 +182,11 @@ public class ContextAgent extends Agent {
 		this.actionPerformed = actionPerformed;
 	}
 
-	public Pair<Boolean, String> getServiceAgentState() {
+	public Pair<Boolean, ArrayList<ServiceAgent>> getServiceAgentState() {
 		return serviceAgentState;
 	}
 
-	private void setServiceAgentState(Pair<Boolean, String> serviceAgentState) {
+	private void setServiceAgentState(Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState) {
 		this.serviceAgentState = serviceAgentState;
 	}
 
