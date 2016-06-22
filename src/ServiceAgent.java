@@ -129,8 +129,13 @@ public class ServiceAgent extends Agent {
 
 	// Acessors
 
+	
 	public int getCountIdContextAgents() {
 		return countIdContextAgents;
+	}
+
+	public InstanceAgent getInstanceAgent() {
+		return instanceAgent;
 	}
 
 	public Double getConfidence() {

@@ -5,10 +5,29 @@ public abstract class AbstractMessage {
 	// This type is not really obligatory, it is more for readability than real
 	// cast
 	private MessageType type;
+	//this attribute is null if Abstract message is instanceof contextAgentProposition
+	private InstanceAgent instanceAgent;
 
 	public AbstractMessage(MessageType type) {
 		this.type = type;
+		this.instanceAgent = null;
 	}
+	
+	
+
+	public AbstractMessage(MessageType type, InstanceAgent instanceAgent) {
+		super();
+		this.type = type;
+		this.instanceAgent = instanceAgent;
+	}
+
+
+	
+	public InstanceAgent getInstanceAgent() {
+		return instanceAgent;
+	}
+
+
 
 	public MessageType getType() {
 		return type;

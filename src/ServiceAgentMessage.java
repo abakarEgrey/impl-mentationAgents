@@ -31,7 +31,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 	public ServiceAgentMessage(int cardinality, String senderType,
 			Action messageType, Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState,
 			int nbOfConnection, Double averageTOConnexion, ServiceAgent serviceAgent) {
-		super(MessageType.SAMESSAGE);
+		super(MessageType.SAMESSAGE, serviceAgent.getInstanceAgent());
 		this.cardinality = cardinality;
 		this.senderType = senderType;
 		this.messageType = messageType;
@@ -44,7 +44,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 	}
 
 	public ServiceAgent getServiceAgent() {
-		return serviceAgent;
+		return this.serviceAgent;
 	}
 
 	/**

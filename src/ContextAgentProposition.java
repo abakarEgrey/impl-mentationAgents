@@ -21,6 +21,7 @@ public class ContextAgentProposition extends AbstractMessage{
 		this.action = action;
 		this.serviceAgentMessage = serviceAgentMessage;
 		this.confidence = contextAgent.getConfidence();
+		
 	}
 
 	public ContextAgent getContextAgent() {

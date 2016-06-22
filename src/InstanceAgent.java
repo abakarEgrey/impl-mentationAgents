@@ -3,6 +3,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import fr.irit.smac.libs.tooling.messaging.AgentMessaging;
+import fr.irit.smac.libs.tooling.messaging.IMsgBox;
 import fr.irit.smac.libs.tooling.messaging.impl.Ref;
 
 public class InstanceAgent<T> extends Agent {
@@ -14,16 +16,31 @@ public class InstanceAgent<T> extends Agent {
 	private T type;
 	// reference of Instance agent
 	private Ref<AbstractMessage> refInstanceAgent;
+	private IMsgBox<AbstractMessage> messageBox;
+	//this parameter contains the list messages to forward to Routage class
+	private ArrayList<AbstractMessage> messagesListToForward;
+	private Routage routage;
 
 	// Constructor
-	public InstanceAgent(String id) {
+	public InstanceAgent(String id, Routage routage) {
 		this.id = id;
+		this.refInstanceAgent =  this.getMessageBox().getRef();
+		this.messageBox = (IMsgBox<AbstractMessage>)AgentMessaging.getMsgBox(id, AbstractMessage.class);
+		this.messagesListToForward = new ArrayList<AbstractMessage>();
+		this.routage = routage;
+		//A l'instanciation d'un agent instance, il s'ajoute automatiquement à la liste des agents de la classe routage
+		this.routage.addInstanceAgent(this);
 	}
 
 	// Accessor
 
+	
 	public int getCountIdContextAgents() {
 		return countIdContextAgents;
+	}
+
+	public IMsgBox<AbstractMessage> getMessageBox() {
+		return messageBox;
 	}
 
 	public Ref<AbstractMessage> getRefInstanceAgent() {
@@ -42,18 +59,23 @@ public class InstanceAgent<T> extends Agent {
 	@Override
 	protected void perceive() {
 		// TODO Auto-generated method stub
-
+		this.messagesListToForward = (ArrayList<AbstractMessage>) this.messageBox.getMsgs();
+		
 	}
 
 	@Override
 	protected void decide() {
 		// TODO Auto-generated method stub
+		//no decision
 
 	}
 
 	@Override
 	protected void act() {
 		// TODO Auto-generated method stub
+		for (AbstractMessage am: this.messagesListToForward){
+			this.messageBox.send(am, this.routage.getRefRoutage());
+		}
 
 	}
 
