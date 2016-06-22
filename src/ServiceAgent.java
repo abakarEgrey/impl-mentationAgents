@@ -68,6 +68,8 @@ public class ServiceAgent extends Agent {
 	// list of actions choosed and don't have a proposition of context agent.
 	// Contexte agent is null
 	private ArrayList<ArrayList<ContextAgentProposition>> actionsChoosedByItSelf;
+	//may be a provided or requires interface
+	private InterfaceType interfaceType;
 
 	// private HashMap<Agent, Pair<Boolean, ArrayList<Agent>>> etatsVoisins;
 
@@ -1145,6 +1147,8 @@ public class ServiceAgent extends Agent {
 	@Override
 	public void delete() {
 		// TODO Auto-generated method stub
+		this.removeAllContextAgents();
+		this.instanceAgent.remove(this);
 
 	}
 
@@ -1238,6 +1242,26 @@ public class ServiceAgent extends Agent {
 
 	public Ref<AbstractMessage> getRefBox() {
 		return messageBox.getRef();
+	}
+	/**
+	 * method allows to delete context agents
+	 * @param contextAgent
+	 */
+	public boolean remove(ContextAgent contextAgent) {
+		// TODO Auto-generated method stub
+		for (ContextAgent ca : this.contextAgents){
+			if (ca.getId().equals(contextAgent.getId())){
+				this.contextAgents.remove(ca);
+				return true;
+			}
+		}
+		return false;
+	}
+	/**
+	 * 
+	 */
+	private void removeAllContextAgents(){
+		this.contextAgents.clear();
 	}
 
 }

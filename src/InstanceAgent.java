@@ -82,6 +82,8 @@ public class InstanceAgent<T> extends Agent {
 	@Override
 	public void delete() {
 		// TODO Auto-generated method stub
+		this.removeAllServiceAgent();
+		this.routage.remove(this);
 
 	}
 
@@ -188,6 +190,26 @@ public class InstanceAgent<T> extends Agent {
 			return neightboursState;
 		}
 		return neightboursState;
+	}
+	/**
+	 * this method allows to delete the service agent
+	 * @param serviceAgent
+	 */
+	public boolean remove(ServiceAgent serviceAgent) {
+		// TODO Auto-generated method stub
+		for (ServiceAgent sa : this.serviceAgents){
+			if (sa.getId().equals(serviceAgent.getId())){
+				this.serviceAgents.remove(sa);
+				return true;
+			}
+		}
+		return false;
+	}
+	/**
+	 * 
+	 */
+	private void removeAllServiceAgent(){
+		this.serviceAgents.clear();
 	}
 
 }

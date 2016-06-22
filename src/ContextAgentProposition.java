@@ -1,5 +1,4 @@
-
-public class ContextAgentProposition extends AbstractMessage{
+public class ContextAgentProposition extends AbstractMessage {
 	/**
 	 * This class allows to get informations context agents proposals
 	 */
@@ -7,7 +6,8 @@ public class ContextAgentProposition extends AbstractMessage{
 	private Action action;
 	private ServiceAgentMessage serviceAgentMessage;
 	private double confidence;
-	
+	private String contextAgentPropositionType = "contextAgentProposition";
+
 	/**
 	 * 
 	 * @param contextAgent
@@ -21,7 +21,8 @@ public class ContextAgentProposition extends AbstractMessage{
 		this.action = action;
 		this.serviceAgentMessage = serviceAgentMessage;
 		this.confidence = contextAgent.getConfidence();
-		
+		this.setAbstractMessageType(contextAgentPropositionType);
+
 	}
 
 	public ContextAgent getContextAgent() {
@@ -35,8 +36,8 @@ public class ContextAgentProposition extends AbstractMessage{
 	public ServiceAgentMessage getServiceAgentMessage() {
 		return serviceAgentMessage;
 	}
-	
-	public double getConfidence(){
+
+	public double getConfidence() {
 		return confidence;
 	}
 
@@ -45,5 +46,13 @@ public class ContextAgentProposition extends AbstractMessage{
 		return new Double(confidence);
 	}
 
-	
+	/**
+	 * redefinition of this for the genericity
+	 */
+	@Override
+	public String getAbstractMessageType() {
+		// TODO Auto-generated method stub
+		return super.getAbstractMessageType();
+	}
+
 }

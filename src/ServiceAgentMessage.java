@@ -3,22 +3,21 @@ import java.util.List;
 
 import fr.irit.smac.libs.tooling.messaging.impl.Ref;
 
-
 public class ServiceAgentMessage extends AbstractMessage {
-	
+
 	private int cardinality;
 	private String senderType;
 	private Action messageType;
 	private Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState;
 	private int nbOfConnection;
 	private Double averageTOConnexion;
-	//l'agent service qui envoie le message
+	// l'agent service qui envoie le message
 	private ServiceAgent serviceAgent;
-	//Variable permettant de compter le nombre de liaison de l'agent service
+	// Variable permettant de compter le nombre de liaison de l'agent service
 	private int nbLink;
 	private Ref<AbstractMessage> refServiceAgent;
-	
-	
+	private String serviceAgentMessageType = "serviceAgentMessage";
+
 	/**
 	 * 
 	 * @param cardinality
@@ -29,8 +28,10 @@ public class ServiceAgentMessage extends AbstractMessage {
 	 * @param averageTOConnexion
 	 */
 	public ServiceAgentMessage(int cardinality, String senderType,
-			Action messageType, Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState,
-			int nbOfConnection, Double averageTOConnexion, ServiceAgent serviceAgent) {
+			Action messageType,
+			Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState,
+			int nbOfConnection, Double averageTOConnexion,
+			ServiceAgent serviceAgent) {
 		super(MessageType.SAMESSAGE, serviceAgent.getInstanceAgent());
 		this.cardinality = cardinality;
 		this.senderType = senderType;
@@ -39,8 +40,9 @@ public class ServiceAgentMessage extends AbstractMessage {
 		this.nbOfConnection = nbOfConnection;
 		this.averageTOConnexion = averageTOConnexion;
 		this.serviceAgent = serviceAgent;
-		this.nbLink = 0;  
-		this.refServiceAgent =  serviceAgent.getMessageBox().getRef();
+		this.nbLink = 0;
+		this.refServiceAgent = serviceAgent.getMessageBox().getRef();
+		this.setAbstractMessageType(serviceAgentMessageType);
 	}
 
 	public ServiceAgent getServiceAgent() {
@@ -54,12 +56,13 @@ public class ServiceAgentMessage extends AbstractMessage {
 	 * @param serviceAgentState
 	 */
 	public ServiceAgentMessage(String senderType, Action messageType,
-			 Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState) {
+			Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState) {
 		super(MessageType.SAMESSAGE);
 		this.senderType = senderType;
 		this.messageType = messageType;
 		this.serviceAgentState = serviceAgentState;
 	}
+
 	/**
 	 * 
 	 * @return
@@ -75,6 +78,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 	public String getSenderType() {
 		return senderType;
 	}
+
 	/**
 	 * 
 	 * @return
@@ -82,13 +86,15 @@ public class ServiceAgentMessage extends AbstractMessage {
 	public Action getMessageType() {
 		return messageType;
 	}
+
 	/**
 	 * 
 	 * @return
 	 */
-	public  Pair<Boolean, ArrayList<ServiceAgent>> getServiceAgentState() {
+	public Pair<Boolean, ArrayList<ServiceAgent>> getServiceAgentState() {
 		return serviceAgentState;
 	}
+
 	/**
 	 * 
 	 * @return
@@ -96,6 +102,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 	public int getNbOfConnection() {
 		return nbOfConnection;
 	}
+
 	/**
 	 * 
 	 * @return
@@ -107,8 +114,11 @@ public class ServiceAgentMessage extends AbstractMessage {
 	public Ref<AbstractMessage> getRefServiceAgent() {
 		return refServiceAgent;
 	}
-	
-	
-	
-	
+
+	@Override
+	public String getAbstractMessageType() {
+		// TODO Auto-generated method stub
+		return super.getAbstractMessageType();
+	}
+
 }

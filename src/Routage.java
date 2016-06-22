@@ -82,6 +82,8 @@ public class Routage extends Agent {
 	@Override
 	public void delete() {
 		// TODO Auto-generated method stub
+		this.removeallInstancesAgents();
+		//may be not usefull to delete this class ?
 
 	}
 
@@ -98,5 +100,25 @@ public class Routage extends Agent {
 			}
 		}
 	}
-
+	/**
+	 * 
+	 * @param instanceAgent
+	 * @return
+	 */
+	public boolean remove(InstanceAgent<?> instanceAgent){
+		for (InstanceAgent<?> ia : this.instanceAgentList){
+			if (ia.getId().equals(instanceAgent.getId())){
+				this.remove(ia);
+				return true;
+			}
+		}
+		return false;
+	}
+	/**
+	 * 
+	 */
+	private void removeallInstancesAgents(){
+		this.instanceAgentList.clear();
+	}
+	
 }

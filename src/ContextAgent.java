@@ -263,6 +263,9 @@ public class ContextAgent extends Agent {
 	@Override
 	public void delete() {
 		// TODO Auto-generated method stub
+		if (this.confidence < 0.1) {
+			this.serviceAgent.remove(this);
+		}
 	}
 
 	// Methodes used during Life Cycle
@@ -294,8 +297,8 @@ public class ContextAgent extends Agent {
 	 */
 	private boolean isBasicCriterionValid(Pair<Boolean, ArrayList<ServiceAgent>> _actualServiceAgentState) {
 		// Validity of the connection range of the context agent
-		if (!((serviceAgentState.getFirst() && _actualServiceAgentState.getFirst())
-				|| !((!serviceAgentState.getFirst() && (!_actualServiceAgentState.getFirst()))))) {
+		if (((serviceAgentState.getFirst() && _actualServiceAgentState.getFirst())
+				|| ((!serviceAgentState.getFirst() && (!_actualServiceAgentState.getFirst()))))) {
 			// TODO may need to be changed if bool can become either
 			return false;
 		}
@@ -314,6 +317,7 @@ public class ContextAgent extends Agent {
 	private boolean isServiceAgentConnectedTypeValid(Pair<Boolean, ArrayList<ServiceAgent>> _actualServiceAgentState) {
 		boolean isV = false;
 		ArrayList<ServiceAgent> servicesAgent = _actualServiceAgentState.getSecond();
+		//Discuter et se mettre d'accords sur la notion de type
 		for (int i = 0; i < servicesAgent.size(); i++) {
 			if (servicesAgent.get(i).getClass().getName().equals(serviceAgentState.getSecond())) {
 				isV = true;
