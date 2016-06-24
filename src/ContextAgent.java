@@ -221,7 +221,7 @@ public class ContextAgent extends Agent {
 				for (ServiceAgentMessage saMessage : mReceivedByAS) {
 					//Read every messages of its service agent
 					//If valid stock the message is a list to answer to it later
-					if (isMessageCriterionValid(saMessage.getSenderType(), saMessage.getMessageType(),
+					if (isMessageCriterionValid(saMessage.getSenderType(), saMessage.getActionType(),
 							saMessage.getServiceAgent(), _actualNeighboursState)) {
 						// The context agent is valid for at least this message
 						isValid = true;

@@ -1,6 +1,7 @@
 
 //package agent;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -27,13 +28,13 @@ import fr.irit.smac.libs.tooling.scheduling.impl.system.SynchronizedSystemStrate
 
 public class SequentialSystemStrategyForOppoCompo extends AbstractSystemStrategy<IAgentStrategy>
 {
-
+	ArrayList<String> messageTypeList;
 	private static enum AGENT
 	{
-		CONTEXT, SERVICE, INSTANCE, SIMULATEUR
+		CONTEXT, SERVICE, MESSAGEBOXHISTORY
 	};
 
-	private AGENT currentAgent = AGENT.SIMULATEUR;
+	private AGENT currentAgent = AGENT.SERVICE;
 	private String currentAgentClassName;
 
 	protected class AgentWrapper implements IAgentStrategy
@@ -49,6 +50,22 @@ public class SequentialSystemStrategyForOppoCompo extends AbstractSystemStrategy
 		@Override
 		public void nextStep()
 		{
+//			if (agent.getClass().getName().equals(currentAgentClassName))
+//			{
+//				agent.nextStep();
+//			}
+//			if(ServiceAgent.class.getName().equals(currentAgentClassName))
+//			{
+////				if (messageTypeList.contains(agent.getClass().getName()))
+////				{
+////					agent.nextStep();
+////				}
+//				if(!agent.getClass().getName().equals(ContextAgent.class.getName()) && !agent.getClass().getName().equals(SAMsgBoxHistoryAgent.class.getName())){
+//					agent.nextStep();
+//				}
+//					
+//
+//			}
 			if (agent.getClass().getName().equals(currentAgentClassName))
 			{
 				agent.nextStep();
@@ -70,6 +87,7 @@ public class SequentialSystemStrategyForOppoCompo extends AbstractSystemStrategy
 
 		internalSystemStrategy = new SynchronizedSystemStrategy(new LinkedHashSet<IAgentStrategy>(), agentExecutor);
 		this.addAgents(agents);
+		messageTypeList = new ArrayList<String>();
 	}
 
 	public SequentialSystemStrategyForOppoCompo(HashSet<IAgentStrategy> hashSet)
@@ -117,6 +135,7 @@ public class SequentialSystemStrategyForOppoCompo extends AbstractSystemStrategy
 		//pauseLock.lock();
 
 		addPendingAgents();
+		System.out.println("addPendingAgents().size = "+this.agents.size());
 		try
 		{
 			internalSystemStrategy.step().get();
@@ -138,6 +157,21 @@ public class SequentialSystemStrategyForOppoCompo extends AbstractSystemStrategy
 		System.out.println("----------- "+currentAgent);*/
 		switch (currentAgent)
 		{
+		case CONTEXT:
+			System.out.println("trace: entrez dans switch context");
+			currentAgentClassName = ServiceAgent.class.getName();
+			currentAgent = AGENT.SERVICE;
+			break;
+		case SERVICE:
+			System.out.println("trace: entrez dans switch service");
+			currentAgentClassName = ServiceAgent.class.getName();
+			currentAgent = AGENT.MESSAGEBOXHISTORY;
+			break;
+		case MESSAGEBOXHISTORY:
+			System.out.println("trace: entrez dans switch messageboxhistory");
+			currentAgentClassName = SAMsgBoxHistoryAgent.class.getName();
+			currentAgent = AGENT.CONTEXT;
+			break;
 //		case SIMULATEUR:
 //			currentAgentClassName = SimulateurAgent.class.getName();
 //			currentAgent = AGENT.SENSOR;

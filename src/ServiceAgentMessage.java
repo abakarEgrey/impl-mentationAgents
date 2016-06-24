@@ -7,7 +7,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 
 	private int cardinality;
 	private String senderType;
-	private Action messageType;
+	private MessageType messageType;
 	private Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState;
 	private int nbOfConnection;
 	private Double averageTOConnexion;
@@ -17,6 +17,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 	private int nbLink;
 	private Ref<AbstractMessage> refServiceAgent;
 	private String serviceAgentMessageType = "serviceAgentMessage";
+	private Action actionType;
 
 	/**
 	 * 
@@ -28,10 +29,10 @@ public class ServiceAgentMessage extends AbstractMessage {
 	 * @param averageTOConnexion
 	 */
 	public ServiceAgentMessage(int cardinality, String senderType,
-			Action messageType,
+			MessageType messageType,
 			Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState,
 			int nbOfConnection, Double averageTOConnexion,
-			ServiceAgent serviceAgent) {
+			ServiceAgent serviceAgent, Action actionType) {
 		super(MessageType.SAMESSAGE, serviceAgent.getInstanceAgent());
 		this.cardinality = cardinality;
 		this.senderType = senderType;
@@ -43,6 +44,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 		this.nbLink = 0;
 		this.refServiceAgent = serviceAgent.getMessageBox().getRef();
 		this.setAbstractMessageType(serviceAgentMessageType);
+		this.actionType = actionType;
 	}
 
 	public ServiceAgent getServiceAgent() {
@@ -55,7 +57,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 	 * @param messageType
 	 * @param serviceAgentState
 	 */
-	public ServiceAgentMessage(String senderType, Action messageType,
+	public ServiceAgentMessage(String senderType, MessageType messageType,
 			Pair<Boolean, ArrayList<ServiceAgent>> serviceAgentState) {
 		super(MessageType.SAMESSAGE);
 		this.senderType = senderType;
@@ -83,7 +85,7 @@ public class ServiceAgentMessage extends AbstractMessage {
 	 * 
 	 * @return
 	 */
-	public Action getMessageType() {
+	public MessageType getMessageType() {
 		return messageType;
 	}
 
@@ -113,6 +115,11 @@ public class ServiceAgentMessage extends AbstractMessage {
 
 	public Ref<AbstractMessage> getRefServiceAgent() {
 		return refServiceAgent;
+	}
+
+	
+	public Action getActionType() {
+		return actionType;
 	}
 
 	@Override

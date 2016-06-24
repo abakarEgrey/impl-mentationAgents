@@ -8,20 +8,20 @@ public abstract class AbstractMessage {
 	private MessageType type;
 	// this attribute is null if Abstract message is instanceof
 	// contextAgentProposition
-	private InstanceAgent<?> instanceAgent;
+	private InstanceAgent instanceAgent;
 
 	public AbstractMessage(MessageType type) {
 		this.type = type;
 		this.instanceAgent = null;
 	}
 
-	public AbstractMessage(MessageType type, InstanceAgent<?> instanceAgent) {
+	public AbstractMessage(MessageType type, InstanceAgent instanceAgent) {
 		super();
 		this.type = type;
 		this.instanceAgent = instanceAgent;
 	}
 
-	public InstanceAgent<?> getInstanceAgent() {
+	public InstanceAgent getInstanceAgent() {
 		return instanceAgent;
 	}
 

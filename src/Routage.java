@@ -22,7 +22,7 @@ public class Routage extends Agent {
 	 * This parameter contains the annonce messages
 	 */
 	private IMsgBox<AbstractMessage> messageBox;
-	private List<InstanceAgent<?>> instanceAgentList;
+	private List<InstanceAgent> instanceAgentList;
 	private Ref<AbstractMessage> refRoutage;
 	private Set<AbstractMessage> messagesInBox;
 
@@ -34,7 +34,7 @@ public class Routage extends Agent {
 		this.messageBox = (IMsgBox<AbstractMessage>) AgentMessaging.getMsgBox(
 				id, AbstractMessage.class);
 		this.refRoutage =  this.getMessageBox().getRef();
-		this.instanceAgentList = new ArrayList<InstanceAgent<?>>();
+		this.instanceAgentList = new ArrayList<InstanceAgent>();
 		this.messagesInBox = new HashSet<AbstractMessage>();
 	}
 
@@ -46,8 +46,11 @@ public class Routage extends Agent {
 	public IMsgBox<AbstractMessage> getMessageBox() {
 		return messageBox;
 	}
-	
-	public void addInstanceAgent(InstanceAgent<?> ia){
+	/**
+	 * this method allows the instance agent to add itself to the list of instance agents
+	 * @param ia
+	 */
+	public void addInstanceAgent(InstanceAgent ia){
 		this.instanceAgentList.add(ia);
 	}
 
@@ -93,8 +96,8 @@ public class Routage extends Agent {
 	 * 
 	 * @param iA
 	 */
-	private void broadcast(AbstractMessage am, InstanceAgent<?> iA) {
-		for (InstanceAgent<?> ia : this.instanceAgentList){
+	private void broadcast(AbstractMessage am, InstanceAgent iA) {
+		for (InstanceAgent ia : this.instanceAgentList){
 			if (iA.getId() != ia.getId()){
 				this.messageBox.send(am, ia.getRefInstanceAgent());
 			}
@@ -105,8 +108,8 @@ public class Routage extends Agent {
 	 * @param instanceAgent
 	 * @return
 	 */
-	public boolean remove(InstanceAgent<?> instanceAgent){
-		for (InstanceAgent<?> ia : this.instanceAgentList){
+	public boolean remove(InstanceAgent instanceAgent){
+		for (InstanceAgent ia : this.instanceAgentList){
 			if (ia.getId().equals(instanceAgent.getId())){
 				this.remove(ia);
 				return true;

@@ -7,29 +7,31 @@ import fr.irit.smac.libs.tooling.messaging.AgentMessaging;
 import fr.irit.smac.libs.tooling.messaging.IMsgBox;
 import fr.irit.smac.libs.tooling.messaging.impl.Ref;
 
-public class InstanceAgent<T> extends Agent {
+public class InstanceAgent extends Agent {
 	// Properties
 	// id
-	private ArrayList<ServiceAgent> serviceAgents;
+	protected ArrayList<ServiceAgent> serviceAgents;
 	private int countIdContextAgents;
 	// T is the of the component
-	private T type;
+	protected String type;
 	// reference of Instance agent
 	private Ref<AbstractMessage> refInstanceAgent;
 	private IMsgBox<AbstractMessage> messageBox;
 	//this parameter contains the list messages to forward to Routage class
 	private ArrayList<AbstractMessage> messagesListToForward;
-	private Routage routage;
+	protected Routage routage;
 
 	// Constructor
 	public InstanceAgent(String id, Routage routage) {
 		this.id = id;
-		this.refInstanceAgent =  this.getMessageBox().getRef();
 		this.messageBox = (IMsgBox<AbstractMessage>)AgentMessaging.getMsgBox(id, AbstractMessage.class);
+		this.refInstanceAgent =  this.getMessageBox().getRef();
 		this.messagesListToForward = new ArrayList<AbstractMessage>();
 		this.routage = routage;
+		this.serviceAgents = new ArrayList<ServiceAgent>();
 		//A l'instanciation d'un agent instance, il s'ajoute automatiquement à la liste des agents de la classe routage
-		this.routage.addInstanceAgent(this);
+		//a commenter pour le moment
+		/*this.routage.addInstanceAgent(this);*/
 	}
 
 	// Accessor
@@ -47,7 +49,7 @@ public class InstanceAgent<T> extends Agent {
 		return refInstanceAgent;
 	}
 
-	public T getType() {
+	public String getType() {
 		return type;
 	}
 
@@ -59,12 +61,14 @@ public class InstanceAgent<T> extends Agent {
 	@Override
 	protected void perceive() {
 		// TODO Auto-generated method stub
+		System.out.println("perceiveInstance: je suis executé");
 		this.messagesListToForward = (ArrayList<AbstractMessage>) this.messageBox.getMsgs();
 		
 	}
 
 	@Override
 	protected void decide() {
+		System.out.println("decideInstance: je suis executé");
 		// TODO Auto-generated method stub
 		//no decision
 
@@ -73,6 +77,7 @@ public class InstanceAgent<T> extends Agent {
 	@Override
 	protected void act() {
 		// TODO Auto-generated method stub
+		System.out.println("actInstance: je suis executé");
 		for (AbstractMessage am: this.messagesListToForward){
 			this.messageBox.send(am, this.routage.getRefRoutage());
 		}
