@@ -38,7 +38,7 @@ abstract public class Agent implements IAgentStrategy {
 	
 //IAgentStrategy implementation
 	public void nextStep(){
-		System.out.println("nexteStep: je suis executé");
+		System.out.println("nexteStep:" +this.getId() + " je suis executé");
 		perceive();
 		decide();
 		act();

@@ -30,7 +30,7 @@ public class SAMsgBoxHistoryAgent extends Agent {
 
 	public ArrayList<ServiceAgentMessage> getSaMessages() {
 		//effectuer un cycle
-		this.nextStep();
+		//this.nextStep();
 		return saMessages;
 	}
 

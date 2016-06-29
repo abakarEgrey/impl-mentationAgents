@@ -7,7 +7,7 @@ public class ImpressInstance extends InstanceAgent {
 	 * (affichage du numéro de la page actuelle)
 	 */
 	
-	private ArrayList<ServiceAgent> serviceAgentList = new ArrayList<ServiceAgent>();
+	//private ArrayList<ServiceAgent> serviceAgentList = new ArrayList<ServiceAgent>();
 	/**
 	 * 
 	 * @param id
@@ -18,6 +18,7 @@ public class ImpressInstance extends InstanceAgent {
 		// TODO Auto-generated constructor stub
 		this.id = id;
 		this.routage = routage;
+		this.type = "ImpressJ";
 		this.createImpressAgents();
 	}
 	/**
@@ -29,8 +30,8 @@ public class ImpressInstance extends InstanceAgent {
 		ServiceAgent prevSlideRequired = new ServiceAgent("@prevSlideRequired", this, 1);
 		ServiceAgent nextSlideRequired = new ServiceAgent("@nextSlideRequired", this, 1);
 		
-		this.serviceAgentList.add(prevSlideRequired);
-		this.serviceAgentList.add(nextSlideRequired);
+		this.serviceAgents.add(prevSlideRequired);
+		this.serviceAgents.add(nextSlideRequired);
 		
 	}
 	/**
@@ -38,7 +39,7 @@ public class ImpressInstance extends InstanceAgent {
 	 * @return
 	 */
 	public ArrayList<ServiceAgent> getServiceAgentList() {
-		return serviceAgentList;
+		return this.serviceAgents;
 	}
 	
 	

@@ -127,5 +127,18 @@ public class ServiceAgentMessage extends AbstractMessage {
 		// TODO Auto-generated method stub
 		return super.getAbstractMessageType();
 	}
+	
+	public void display(){
+		System.out.println("/*=================================================================================*/");
+		System.out.println("id : "+this.getServiceAgent().getId());
+		System.out.println("cardinalite : "+this.cardinality);
+		System.out.println("senderType : "+this.senderType);
+		System.out.println("messageType : "+this.messageType);
+		System.out.println("serviceAgentState : "+this.serviceAgentState);
+		System.out.println("nbOfConnection : "+this.nbOfConnection);
+		System.out.println("actionType : "+this.actionType);
+		System.out.println("refServiceAgent"+this.refServiceAgent);
+		System.out.println("/*=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=*/");
+	}
 
 }

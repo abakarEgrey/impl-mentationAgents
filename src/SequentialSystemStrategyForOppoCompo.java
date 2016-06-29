@@ -158,17 +158,19 @@ public class SequentialSystemStrategyForOppoCompo extends AbstractSystemStrategy
 		switch (currentAgent)
 		{
 		case CONTEXT:
-			System.out.println("trace: entrez dans switch context");
+			System.out.println("trace: entrez dans switch context et execution de l'agent contexte");
 			currentAgentClassName = ServiceAgent.class.getName();
 			currentAgent = AGENT.SERVICE;
 			break;
 		case SERVICE:
-			System.out.println("trace: entrez dans switch service");
+			System.out.println("trace: entrez dans switch service et execution de l'agent service");
+			//execution de l'agent
+			
 			currentAgentClassName = ServiceAgent.class.getName();
 			currentAgent = AGENT.MESSAGEBOXHISTORY;
 			break;
 		case MESSAGEBOXHISTORY:
-			System.out.println("trace: entrez dans switch messageboxhistory");
+			System.out.println("trace: entrez dans switch messageboxhistory et et execution de l'agent history box");
 			currentAgentClassName = SAMsgBoxHistoryAgent.class.getName();
 			currentAgent = AGENT.CONTEXT;
 			break;

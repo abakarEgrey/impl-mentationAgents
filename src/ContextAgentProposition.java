@@ -20,7 +20,12 @@ public class ContextAgentProposition extends AbstractMessage {
 		this.contextAgent = contextAgent;
 		this.action = action;
 		this.serviceAgentMessage = serviceAgentMessage;
-		this.confidence = contextAgent.getConfidence();
+		if (contextAgent != null) {
+			this.confidence = contextAgent.getConfidence();
+		} else {
+			this.confidence = 0;
+		}
+
 		this.setAbstractMessageType(contextAgentPropositionType);
 
 	}
@@ -53,6 +58,28 @@ public class ContextAgentProposition extends AbstractMessage {
 	public String getAbstractMessageType() {
 		// TODO Auto-generated method stub
 		return super.getAbstractMessageType();
+	}
+
+	/**
+	 * 
+	 */
+	public void display() {
+		System.out
+				.println("/*=================debut d'affichage d'une proposition de l'agent contexte====================*/");
+
+		System.out.println("context agent = ");
+		if (this.contextAgent != null) {
+			this.contextAgent.display();
+		}
+		System.out.println("action = " + this.action);
+		System.out.println("serviceAgentMessage = ");
+		this.serviceAgentMessage.display();
+		System.out.println("confidence = " + this.confidence);
+		System.out.println("contextAgentPropositionType = "
+				+ this.contextAgentPropositionType);
+		System.out
+				.println("/*=/=/=/=/=/=/=/=/=/=/fin affichage proposition agent contexte/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=*/");
+
 	}
 
 }

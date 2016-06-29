@@ -27,9 +27,9 @@ public class ContextAgent extends Agent {
 	// private Cardinality
 
 	private ArrayList<Pair<Boolean, ServiceAgent>> neightboursState; // (same
-																// instance,
-																// agent
-																// type)
+	// instance,
+	// agent
+	// type)
 	private Action actionPerformed;
 	private String senderType;
 	private Action messageType;
@@ -78,8 +78,9 @@ public class ContextAgent extends Agent {
 		this.serviceAgent = serviceAgent;
 		this.confidence = confidence;
 		this.messageBox = (IMsgBox<AbstractMessage>) AgentMessaging.getMsgBox(id, AbstractMessage.class);
-		this.refAgentService =  serviceAgent.getMessageBox().getRef();
+		this.refAgentService = serviceAgent.getMessageBox().getRef();
 		this.feedBack = 0;
+		this.listValidatingSAMessage = new ArrayList<ServiceAgentMessage>();
 		// this.ArrayListServiceAgentMessage = new
 		// ArrayList<ServiceAgentMessage>();
 		// ??
@@ -120,12 +121,11 @@ public class ContextAgent extends Agent {
 
 	// Accessors and mutators
 
-	
 	public Double getConfidenceD() {
-		//Implemented for comparable need
+		// Implemented for comparable need
 		return new Double(confidence);
 	}
-	
+
 	public int getFeedBack() {
 		return feedBack;
 	}
@@ -134,7 +134,7 @@ public class ContextAgent extends Agent {
 		this.feedBack = feedBack;
 	}
 
-	public double getConfidence(){
+	public double getConfidence() {
 		return confidence;
 	}
 
@@ -198,7 +198,6 @@ public class ContextAgent extends Agent {
 		this.isValid = isValid;
 	}
 
-	
 	// Life cycle
 
 	public Ref<AbstractMessage> getRefAgentService() {
@@ -208,56 +207,108 @@ public class ContextAgent extends Agent {
 	@Override
 	protected void perceive() {
 		// New cycle, e
+		System.out.println("perceive: " + this.getId() + " Agent Contexte: je suis en cours d'exécution");
 		isValid = false;
 		listValidatingSAMessage.clear();
+		// validité de l'agent contexte lorsque l'agent service effectue une
+		// annonce pour la 2e fois
+		if (this.serviceAgent.getServiceMessages().isEmpty()) {
+			// regarder les caractéristiques de l'agent service, s'il y a un
+			// changement ou pas
+
+		} else {
+
+		} // fin new if
 
 		if (isBasicCriterionValid(serviceAgent.getCurrentServiceState())) {
 			// Neightbours
 			// TODO to change change.........................................
 			ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> _actualNeighboursState = getActualNeighboursState();
 			if (isNeighboursStateValid(_actualNeighboursState)) {
-				/////
-				ArrayList<ServiceAgentMessage> mReceivedByAS = serviceAgent.getServiceMessages();
-				for (ServiceAgentMessage saMessage : mReceivedByAS) {
-					//Read every messages of its service agent
-					//If valid stock the message is a list to answer to it later
-					if (isMessageCriterionValid(saMessage.getSenderType(), saMessage.getActionType(),
-							saMessage.getServiceAgent(), _actualNeighboursState)) {
-						// The context agent is valid for at least this message
+
+				ArrayList<ServiceAgentMessage> mReceivedByAS = this.serviceAgent.getServiceMessages();
+
+				// validité de l'agent contexte lorsque l'agent service effectue
+				// une
+				// annonce pour la 2e fois
+				if (mReceivedByAS.isEmpty()) {
+					// regarder les caractéristiques de l'agent service, s'il y
+					// a un
+					// changement ou pas. L'etat de l'agent service
+					// ()serviceAgentState) est verifié par la méthode
+					// isBasicCriterionValid et les etats des voisins par la
+					// methode isNeighboursStateValid
+					if (isSenderTypeAndMessageTypeValid()) {
 						isValid = true;
-						listValidatingSAMessage.add(saMessage);
+
 					}
+
+				} else {
+					for (ServiceAgentMessage saMessage : mReceivedByAS) {
+						// Read every messages of its service agent
+						// If valid stock the message is a list to answer to it
+						// later
+						if (isMessageCriterionValid(saMessage.getSenderType(), saMessage.getActionType(),
+								saMessage.getServiceAgent(), _actualNeighboursState)) {
+							// The context agent is valid for at least this
+							// message
+							isValid = true;
+							listValidatingSAMessage.add(saMessage);
+						}
+					}
+
 				}
+
 			}
 
 		}
+		System.out.println("perceive : " + this.getId() + " Agent Contexte: mon execution est terminée");
+	}
+
+	private boolean isSenderTypeAndMessageTypeValid() {
+		// TODO Auto-generated method stub
+		if ((this.senderType.equals(this.serviceAgent.getInstanceAgent().getType())) && (this.messageType == null)) {
+			// this.message = null ici dans le cas ou un agent contexte est créé
+			// sans avoir à repondre un message
+			return true;
+		}
+		return false;
 	}
 
 	@Override
 	protected void decide() {
+		System.out.println("decide: " + this.getId() + " Agent Contexte: je suis en cours d'exécution");
 		// A contextAgent may be valid for multiple messages, for all those
 		// messages he will send a proposition to its service agent
 		// No real decision
-		
-		
+
+		System.out.println("decide : " + this.getId() + " Agent Contexte: mon execution est terminée");
 	}
 
 	@Override
 	protected void act() {
-		if(isValid){
-			if (listValidatingSAMessage.isEmpty()){
-				//TODO error
-			}
-			else{
+		System.out.println("act : " + this.getId() + " Agent Contexte: je suis en cours d'exécution");
+		if (isValid) {
+			System.out.println(this.getId() + "je suis valide ");
+			if (listValidatingSAMessage.isEmpty()) {
+				// TODO serviceAgentMessage est null car l'agent contexte ne
+				// repond a aucun message. Il faut tester le service agent
+				// message s'il est null ou pas dans les classes qui l'utilisent
+				ContextAgentProposition contextAgentProposition = new ContextAgentProposition(this,
+						this.actionPerformed, null);
+				messageBox.send(contextAgentProposition, refAgentService);
+			} else {
 				// Sends its proposition to its serviceAgent
-				for(ServiceAgentMessage saM : listValidatingSAMessage ){
+				for (ServiceAgentMessage saM : listValidatingSAMessage) {
 					ContextAgentProposition msg = new ContextAgentProposition(this, this.actionPerformed, saM);
 					messageBox.send(msg, refAgentService);
 				}
 				listValidatingSAMessage.clear();
 			}
+		} else {
+			System.out.println(this.getId() + "je suis invalide ");
 		}
-		
+		System.out.println("act : " + this.getId() + " Agent Contexte: mon execution est terminée");
 	}
 
 	@Override
@@ -273,10 +324,12 @@ public class ContextAgent extends Agent {
 	private ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> getActualNeighboursState() {
 		ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> actualNeighboursState = serviceAgent
 				.getActualNeighboursState();
-		if (actualNeighboursState.size() == neightboursState.size()) {
-			// The size is good: normal behavior
-		} else {
-			// TODO send an error
+		if (!actualNeighboursState.isEmpty()) {
+			if (actualNeighboursState.size() == neightboursState.size()) {
+				// The size is good: normal behavior
+			} else {
+				// TODO send an error
+			}
 		}
 		return actualNeighboursState;
 	}
@@ -297,8 +350,8 @@ public class ContextAgent extends Agent {
 	 */
 	private boolean isBasicCriterionValid(Pair<Boolean, ArrayList<ServiceAgent>> _actualServiceAgentState) {
 		// Validity of the connection range of the context agent
-		if (((serviceAgentState.getFirst() && _actualServiceAgentState.getFirst())
-				|| ((!serviceAgentState.getFirst() && (!_actualServiceAgentState.getFirst()))))) {
+		if (!(((serviceAgentState.getFirst() && _actualServiceAgentState.getFirst())
+				|| ((!serviceAgentState.getFirst() && (!_actualServiceAgentState.getFirst())))))) {
 			// TODO may need to be changed if bool can become either
 			return false;
 		}
@@ -317,14 +370,17 @@ public class ContextAgent extends Agent {
 	private boolean isServiceAgentConnectedTypeValid(Pair<Boolean, ArrayList<ServiceAgent>> _actualServiceAgentState) {
 		boolean isV = false;
 		ArrayList<ServiceAgent> servicesAgent = _actualServiceAgentState.getSecond();
-		//Discuter et se mettre d'accords sur la notion de type
-		for (int i = 0; i < servicesAgent.size(); i++) {
-			if (servicesAgent.get(i).getClass().getName().equals(serviceAgentState.getSecond())) {
-				isV = true;
-				break;
+		// Discuter et se mettre d'accords sur la notion de type
+		if (!serviceAgentState.getSecond().isEmpty()) {
+			for (int i = 0; i < servicesAgent.size(); i++) {
+				if (servicesAgent.get(i).getClass().getName().equals(serviceAgentState.getSecond())) {
+					isV = true;
+					break;
+				}
 			}
+			return isV;
 		}
-		return isV;
+		return true;
 	}
 
 	/**
@@ -339,7 +395,7 @@ public class ContextAgent extends Agent {
 	 */
 	private boolean isMessageCriterionValid(String _senderType, Action _messageType, ServiceAgent sender,
 			ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> _actualNeighboursState) {
-		boolean isV=true;
+		boolean isV = true;
 		if (_senderType == null || senderType == null || !_senderType.equals(senderType)) {
 			// TODO change if become a list
 			return false;
@@ -347,41 +403,38 @@ public class ContextAgent extends Agent {
 		if (_messageType == null || messageType == null || !_messageType.equals(messageType)) {
 			return false;
 		}
-		
-		//for (ArrayList<Pair<Boolean, ServiceAgent>> actualNState : _actualNeighboursState)
-		for (int i = 0; i< _actualNeighboursState.size(); i++)
-		{
+
+		// for (ArrayList<Pair<Boolean, ServiceAgent>> actualNState :
+		// _actualNeighboursState)
+		for (int i = 0; i < _actualNeighboursState.size(); i++) {
 			ArrayList<Pair<Boolean, ServiceAgent>> actualNState = _actualNeighboursState.get(i);
-			//boolean sameInstance;
-			
-			if(neightboursState.get(i).getFirst()){
+			// boolean sameInstance;
+
+			if (neightboursState.get(i).getFirst()) {
 				isV = false;
-				for (Pair<Boolean, ServiceAgent> connectedSA : actualNState)
-				{
-					if (connectedSA.getSecond().equals(sender)){
+				for (Pair<Boolean, ServiceAgent> connectedSA : actualNState) {
+					if (connectedSA.getSecond().equals(sender)) {
 						isV = true;
 						break;
 					}
 				}
-				if (!isV){
+				if (!isV) {
 					break;
 				}
-			}
-			else{
+			} else {
 				isV = true;
-				for (Pair<Boolean, ServiceAgent> connectedSA : actualNState)
-				{
-					if(connectedSA.getSecond().equals(sender)){
+				for (Pair<Boolean, ServiceAgent> connectedSA : actualNState) {
+					if (connectedSA.getSecond().equals(sender)) {
 						isV = false;
 						break;
 					}
 				}
-				if (!isV){
+				if (!isV) {
 					break;
 				}
 			}
 		}
-		
+
 		return isV;
 	}
 
@@ -389,27 +442,28 @@ public class ContextAgent extends Agent {
 	private boolean isNeighboursStateValid(ArrayList<ArrayList<Pair<Boolean, ServiceAgent>>> actualNeighboursState) {
 
 		boolean isV = true;
+		if (!actualNeighboursState.isEmpty()) {
+			if (actualNeighboursState.size() == neightboursState.size()) {
+				ArrayList<Pair<Boolean, ServiceAgent>> actualNState;
+				boolean isNeiV = false;
 
-		if (actualNeighboursState.size() == neightboursState.size()) {
-			ArrayList<Pair<Boolean, ServiceAgent>> actualNState;
-			boolean isNeiV = false;
+				// The size is good: normal behavior
+				// Look for every neighbour (isNeiV) if the expected neighbour
+				// context
+				// really is
+				for (int i = 0; i < actualNeighboursState.size(); i++) {
+					actualNState = actualNeighboursState.get(i);
+					isNeiV = isNeighbourV(actualNState);
 
-			// The size is good: normal behavior
-			// Look for every neighbour (isNeiV) if the expected neighbour
-			// context
-			// really is
-			for (int i = 0; i < actualNeighboursState.size(); i++) {
-				actualNState = actualNeighboursState.get(i);
-				isNeiV = isNeighbourV(actualNState);
+					if (!isNeiV) {
+						isV = false;
+						break;
+					}
 
-				if (!isNeiV) {
-					isV = false;
-					break;
 				}
-
+			} else {
+				// TODO send an error
 			}
-		} else {
-			// TODO send an error
 		}
 		return isV;
 	}
@@ -512,6 +566,22 @@ public class ContextAgent extends Agent {
 	private void calculateConfidence(Boolean serviceAgentReponse) {
 		int res = (serviceAgentReponse) ? 1 : 0;
 		this.confidence = (1 - LAMBDA) * this.confidence + LAMBDA * res;
+	}
+
+	/**
+	 * 
+	 */
+	public void display() {
+		System.out.println(
+				"(************************debut affichage agent contexte*********************************************)");
+		System.out.println("serviceAgentId = " + this.serviceAgent.getId());
+		System.out.println("confidence = " + this.confidence);
+		System.out.println("actionPerformed = " + this.actionPerformed);
+		System.out.println("senderType = " + this.senderType);
+		System.out.println("messageType = " + messageType);
+		System.out.println("serviceAgentState = " + this.serviceAgentState.getFirst());
+		System.out.println(
+				"(*/*/*/*/*/*/*/*/*/*/*/*/*fin affichage agent contexte*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*)");
 	}
 
 }
